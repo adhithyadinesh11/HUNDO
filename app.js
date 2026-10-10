@@ -1,26 +1,25 @@
 /* =====================================================
    HUNDO — APP.JS
-   Cross-platform version
-   iPhone + Android + Desktop
+   Cross-platform / mobile-safe version
 ===================================================== */
 
 
 /* =====================================================
-   SUPABASE
+   SUPABASE CONFIG
 ===================================================== */
 
 const SUPABASE_URL =
     "https://vdrjynreworkifysxuhd.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_zq-tc602UONo5fg90pfeb_57-WM8cC";
+    "sb_publishable_zq-tc602UONo5fg90pfebg_57-WM8cC";
 
 
 let supabaseClient = null;
 
 
 /* =====================================================
-   SAFE SUPABASE INITIALIZATION
+   SUPABASE INITIALIZATION
 ===================================================== */
 
 function initializeSupabase() {
@@ -36,13 +35,16 @@ function initializeSupabase() {
                 SUPABASE_PUBLISHABLE_KEY
             );
 
-        console.log("Supabase initialized.");
+        console.log(
+            "HUNDO: Supabase initialized."
+        );
 
         return true;
     }
 
+
     console.error(
-        "Supabase library did not load."
+        "HUNDO: Supabase library was not loaded."
     );
 
     return false;
@@ -50,56 +52,61 @@ function initializeSupabase() {
 
 
 /* =====================================================
-   DOM READY
+   START
 ===================================================== */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function () {
 
         initializeSupabase();
 
-        initializeHUNDO();
+        initializeApp();
 
     }
 );
 
 
 /* =====================================================
-   INITIALIZE APP
+   APP INITIALIZATION
 ===================================================== */
 
-function initializeHUNDO() {
+function initializeApp() {
 
-    /* ---------------------------------------------
-       SCREEN ELEMENTS
-    --------------------------------------------- */
+
+    /* =================================================
+       SCREENS
+    ================================================= */
 
     const authScreen =
-        document.getElementById("auth-screen");
+        document.getElementById(
+            "auth-screen"
+        );
 
     const signupScreen =
-        document.getElementById("signup-screen");
+        document.getElementById(
+            "signup-screen"
+        );
 
     const appScreen =
-        document.getElementById("app-screen");
+        document.getElementById(
+            "app-screen"
+        );
 
 
-    /* ---------------------------------------------
-       AUTH ELEMENTS
-    --------------------------------------------- */
-
-    const loginForm =
-        document.getElementById("login-form");
-
-    const signupForm =
-        document.getElementById("signup-form");
+    /* =================================================
+       AUTH BUTTONS
+    ================================================= */
 
     const showSignupButton =
-        document.getElementById("show-signup");
+        document.getElementById(
+            "show-signup"
+        );
 
     const backToLoginButton =
-        document.getElementById("back-to-login");
+        document.getElementById(
+            "back-to-login"
+        );
 
 
     /* =================================================
@@ -112,14 +119,18 @@ function initializeHUNDO() {
             "click",
             function () {
 
-                authScreen.classList.add("hidden");
+                authScreen.classList.add(
+                    "hidden"
+                );
 
-                signupScreen.classList.remove("hidden");
+                signupScreen.classList.remove(
+                    "hidden"
+                );
 
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
+                window.scrollTo(
+                    0,
+                    0
+                );
 
             }
         );
@@ -137,14 +148,18 @@ function initializeHUNDO() {
             "click",
             function () {
 
-                signupScreen.classList.add("hidden");
+                signupScreen.classList.add(
+                    "hidden"
+                );
 
-                authScreen.classList.remove("hidden");
+                authScreen.classList.remove(
+                    "hidden"
+                );
 
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
+                window.scrollTo(
+                    0,
+                    0
+                );
 
             }
         );
@@ -153,8 +168,14 @@ function initializeHUNDO() {
 
 
     /* =================================================
-       LOGIN
+       LOGIN FORM
     ================================================= */
+
+    const loginForm =
+        document.getElementById(
+            "login-form"
+        );
+
 
     if (loginForm) {
 
@@ -164,27 +185,39 @@ function initializeHUNDO() {
 
                 event.preventDefault();
 
+
                 if (!supabaseClient) {
 
-                    alert(
-                        "HUNDO is still connecting. Please try again."
-                    );
+                    const connected =
+                        initializeSupabase();
 
-                    initializeSupabase();
 
-                    return;
+                    if (!connected) {
+
+                        alert(
+                            "HUNDO could not connect to Supabase. Please refresh and try again."
+                        );
+
+                        return;
+                    }
+
                 }
 
 
                 const email =
                     document
-                        .getElementById("login-email")
+                        .getElementById(
+                            "login-email"
+                        )
                         .value
                         .trim();
 
+
                 const password =
                     document
-                        .getElementById("login-password")
+                        .getElementById(
+                            "login-password"
+                        )
                         .value;
 
 
@@ -193,18 +226,23 @@ function initializeHUNDO() {
                     const {
                         error
                     } =
-                        await supabaseClient.auth.signInWithPassword({
+                        await supabaseClient.auth
+                            .signInWithPassword({
 
-                            email: email,
+                                email:
+                                    email,
 
-                            password: password
+                                password:
+                                    password
 
-                        });
+                            });
 
 
                     if (error) {
 
-                        alert(error.message);
+                        alert(
+                            error.message
+                        );
 
                         return;
                     }
@@ -215,10 +253,14 @@ function initializeHUNDO() {
                 }
                 catch (error) {
 
-                    console.error(error);
+                    console.error(
+                        "Login error:",
+                        error
+                    );
+
 
                     alert(
-                        "Unable to connect. Please try again."
+                        "Something went wrong while logging in."
                     );
 
                 }
@@ -230,8 +272,14 @@ function initializeHUNDO() {
 
 
     /* =================================================
-       SIGNUP
+       SIGNUP FORM
     ================================================= */
+
+    const signupForm =
+        document.getElementById(
+            "signup-form"
+        );
+
 
     if (signupForm) {
 
@@ -244,43 +292,55 @@ function initializeHUNDO() {
 
                 if (!supabaseClient) {
 
-                    initializeSupabase();
+                    const connected =
+                        initializeSupabase();
 
-                }
 
+                    if (!connected) {
 
-                if (!supabaseClient) {
+                        alert(
+                            "HUNDO could not connect to Supabase. Please refresh and try again."
+                        );
 
-                    alert(
-                        "HUNDO is still connecting. Please try again."
-                    );
+                        return;
+                    }
 
-                    return;
                 }
 
 
                 const name =
                     document
-                        .getElementById("signup-name")
+                        .getElementById(
+                            "signup-name"
+                        )
                         .value
                         .trim();
+
 
                 const age =
                     Number(
                         document
-                            .getElementById("signup-age")
+                            .getElementById(
+                                "signup-age"
+                            )
                             .value
                     );
 
+
                 const email =
                     document
-                        .getElementById("signup-email")
+                        .getElementById(
+                            "signup-email"
+                        )
                         .value
                         .trim();
 
+
                 const password =
                     document
-                        .getElementById("signup-password")
+                        .getElementById(
+                            "signup-password"
+                        )
                         .value;
 
 
@@ -331,31 +391,45 @@ function initializeHUNDO() {
                 try {
 
                     /* -------------------------------------
-                       CREATE AUTH USER
+                       CREATE ACCOUNT
                     ------------------------------------- */
 
                     const {
                         data,
                         error
                     } =
-                        await supabaseClient.auth.signUp({
+                        await supabaseClient.auth
+                            .signUp({
 
-                            email: email,
+                                email:
+                                    email,
 
-                            password: password
+                                password:
+                                    password
 
-                        });
+                            });
 
 
                     if (error) {
 
-                        alert(error.message);
+                        console.error(
+                            "Signup error:",
+                            error
+                        );
+
+
+                        alert(
+                            error.message
+                        );
 
                         return;
                     }
 
 
-                    if (!data.user) {
+                    if (
+                        !data ||
+                        !data.user
+                    ) {
 
                         alert(
                             "Account could not be created."
@@ -373,12 +447,16 @@ function initializeHUNDO() {
                         error: profileError
                     } =
                         await supabaseClient
-                            .from("profiles")
+                            .from(
+                                "profiles"
+                            )
                             .update({
 
-                                name: name,
+                                name:
+                                    name,
 
-                                age: age
+                                age:
+                                    age
 
                             })
                             .eq(
@@ -390,11 +468,13 @@ function initializeHUNDO() {
                     if (profileError) {
 
                         console.error(
+                            "Profile error:",
                             profileError
                         );
 
+
                         alert(
-                            "Account created, but profile could not be saved."
+                            "Your account was created, but your profile could not be saved."
                         );
 
                         return;
@@ -402,7 +482,7 @@ function initializeHUNDO() {
 
 
                     /* -------------------------------------
-                       OPEN APP
+                       OPEN HUNDO
                     ------------------------------------- */
 
                     openApp();
@@ -410,10 +490,14 @@ function initializeHUNDO() {
                 }
                 catch (error) {
 
-                    console.error(error);
+                    console.error(
+                        "Signup exception:",
+                        error
+                    );
+
 
                     alert(
-                        "Something went wrong. Please try again."
+                        "Something went wrong while creating your account."
                     );
 
                 }
@@ -425,13 +509,14 @@ function initializeHUNDO() {
 
 
     /* =================================================
-       BOTTOM NAVIGATION
+       NAVIGATION
     ================================================= */
 
     const navItems =
         document.querySelectorAll(
             ".nav-item"
         );
+
 
     const pages =
         document.querySelectorAll(
@@ -492,10 +577,10 @@ function initializeHUNDO() {
                     );
 
 
-                    window.scrollTo({
-                        top: 0,
-                        behavior: "smooth"
-                    });
+                    window.scrollTo(
+                        0,
+                        0
+                    );
 
                 }
             );
@@ -505,7 +590,7 @@ function initializeHUNDO() {
 
 
     /* =================================================
-       HOME LOG BUTTON
+       HOME → LOG ACTIVITY
     ================================================= */
 
     const homeLogButton =
@@ -531,11 +616,19 @@ function initializeHUNDO() {
                 );
 
 
-                document
-                    .getElementById("log-page")
-                    .classList.remove(
+                const logPage =
+                    document.getElementById(
+                        "log-page"
+                    );
+
+
+                if (logPage) {
+
+                    logPage.classList.remove(
                         "hidden"
                     );
+
+                }
 
 
                 navItems.forEach(
@@ -564,10 +657,10 @@ function initializeHUNDO() {
                 }
 
 
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
+                window.scrollTo(
+                    0,
+                    0
+                );
 
             }
         );
@@ -636,7 +729,7 @@ function initializeHUNDO() {
 
         activityForm.addEventListener(
             "submit",
-            async function (event) {
+            function (event) {
 
                 event.preventDefault();
 
@@ -644,9 +737,28 @@ function initializeHUNDO() {
                 const distance =
                     Number(
                         document
-                            .getElementById("distance")
+                            .getElementById(
+                                "distance"
+                            )
                             .value
                     );
+
+
+                const duration =
+                    document
+                        .getElementById(
+                            "duration"
+                        )
+                        .value;
+
+
+                const caption =
+                    document
+                        .getElementById(
+                            "caption"
+                        )
+                        .value
+                        .trim();
 
 
                 if (
@@ -660,25 +772,6 @@ function initializeHUNDO() {
 
                     return;
                 }
-
-
-                const durationValue =
-                    document
-                        .getElementById("duration")
-                        .value;
-
-
-                const duration =
-                    durationValue
-                        ? Number(durationValue)
-                        : null;
-
-
-                const caption =
-                    document
-                        .getElementById("caption")
-                        .value
-                        .trim();
 
 
                 console.log({
@@ -717,15 +810,15 @@ function initializeHUNDO() {
                 );
 
 
-                const firstActivity =
+                const runButton =
                     document.querySelector(
-                        ".activity-type[data-type='run']"
+                        '[data-type="run"]'
                     );
 
 
-                if (firstActivity) {
+                if (runButton) {
 
-                    firstActivity.classList.add(
+                    runButton.classList.add(
                         "active"
                     );
 
@@ -781,95 +874,7 @@ function initializeHUNDO() {
 
 
     /* =================================================
-       LOGOUT
-    ================================================= */
-
-    const logoutButton =
-        document.getElementById(
-            "logout-button"
-        );
-
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            async function () {
-
-                if (supabaseClient) {
-
-                    await supabaseClient.auth.signOut();
-
-                }
-
-
-                appScreen.classList.add(
-                    "hidden"
-                );
-
-                signupScreen.classList.add(
-                    "hidden"
-                );
-
-                authScreen.classList.remove(
-                    "hidden"
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =================================================
-       WEIGHT FORM
-    ================================================= */
-
-    const weightForm =
-        document.getElementById(
-            "weight-form"
-        );
-
-
-    if (weightForm) {
-
-        weightForm.addEventListener(
-            "submit",
-            function (event) {
-
-                event.preventDefault();
-
-                const weight =
-                    document
-                        .getElementById("weight")
-                        .value;
-
-
-                if (!weight) {
-
-                    alert(
-                        "Please enter your weight."
-                    );
-
-                    return;
-                }
-
-
-                alert(
-                    "Weight tracker will be connected to Supabase next."
-                );
-
-
-                weightForm.reset();
-
-            }
-        );
-
-    }
-
-
-    /* =================================================
-       INITIAL SESSION CHECK
+       EXISTING SESSION
     ================================================= */
 
     checkExistingSession();
@@ -888,10 +893,12 @@ function openApp() {
             "auth-screen"
         );
 
+
     const signupScreen =
         document.getElementById(
             "signup-screen"
         );
+
 
     const appScreen =
         document.getElementById(
@@ -903,25 +910,27 @@ function openApp() {
         "hidden"
     );
 
+
     signupScreen.classList.add(
         "hidden"
     );
+
 
     appScreen.classList.remove(
         "hidden"
     );
 
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    window.scrollTo(
+        0,
+        0
+    );
 
 }
 
 
 /* =====================================================
-   EXISTING SESSION
+   SESSION CHECK
 ===================================================== */
 
 async function checkExistingSession() {
@@ -937,7 +946,8 @@ async function checkExistingSession() {
         const {
             data
         } =
-            await supabaseClient.auth.getSession();
+            await supabaseClient.auth
+                .getSession();
 
 
         if (
@@ -963,22 +973,9 @@ async function checkExistingSession() {
 
 
 /* =====================================================
-   PREVENT IOS DOUBLE-TAP / BUTTON WEIRDNESS
-===================================================== */
-
-document.addEventListener(
-    "touchstart",
-    function () {},
-    {
-        passive: true
-    }
-);
-
-
-/* =====================================================
-   HUNDO LOADED
+   HUNDO READY
 ===================================================== */
 
 console.log(
-    "HUNDO cross-platform app loaded."
+    "HUNDO loaded."
 );
