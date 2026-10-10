@@ -2,6 +2,14 @@
    HUNDO — APP.JS
 ========================= */
 
+const SUPABASE_URL = "https://vdrjynreworkifysxuhd.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zq-tc602UONo5fg90pfebg_57-WM8cC";
+
+const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
 
 /* =========================
    SCREEN ELEMENTS
