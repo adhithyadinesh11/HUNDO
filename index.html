@@ -1045,24 +1045,48 @@
 
             <section class="weight-section">
 
+    <h3>
+        Weight tracker
+    </h3>
 
-                <h3>
-                    Weight tracker
-                </h3>
+    <p>
+        Your weight data is private.
+    </p>
 
+    <form id="weight-form" class="weight-form">
 
-                <p>
-                    Your weight data is private.
-                </p>
+        <div class="weight-input-wrap">
 
+            <input
+                type="number"
+                id="weight-input"
+                placeholder="Enter weight"
+                min="1"
+                max="500"
+                step="0.1"
+                inputmode="decimal"
+                required
+            >
 
-            </section>
-
+            <span>kg</span>
 
         </div>
 
+        <button
+            type="submit"
+            class="primary-button"
+        >
+            Add weight
+        </button>
 
-    </section>
+    </form>
+
+    <div
+        id="weight-history"
+        class="weight-history"
+    ></div>
+
+</section>
 
 
     <!-- =================================================
