@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
     <meta
@@ -25,16 +26,16 @@
     >
 
     <meta
-        name="apple-mobile-web-app-title"
-        content="HUNDO"
-    >
-
-    <meta
         name="mobile-web-app-capable"
         content="yes"
     >
 
     <title>HUNDO</title>
+
+    <meta
+        name="description"
+        content="HUNDO — 100 days. One challenge. Your distance."
+    >
 
     <link rel="stylesheet" href="style.css">
 
@@ -43,729 +44,748 @@
 
 <body>
 
-<!-- =====================================================
-     AUTH SCREEN
-===================================================== -->
+    <!-- =========================
+         AUTH SCREEN
+    ========================== -->
 
-<section id="auth-screen" class="screen">
+    <main id="auth-screen" class="screen">
 
-    <div class="auth-container">
+        <div class="auth-container">
 
-        <div class="brand">
-            <h1>HUNDO</h1>
-            <p>100 days. One challenge.</p>
-        </div>
+            <div class="brand">
+
+                <div class="brand-mark">
+                    1
+                </div>
+
+                <h1>
+                    HUNDO
+                </h1>
+
+            </div>
 
 
-        <div class="auth-card">
+            <p class="tagline">
+                100 days. One challenge.
+            </p>
 
-            <h2>Welcome back</h2>
 
-            <form id="login-form">
+            <div class="auth-card">
 
-                <div class="form-group">
+                <h2>
+                    Welcome to HUNDO
+                </h2>
+
+                <p class="auth-subtitle">
+                    Track your distance. Challenge your friends.
+                </p>
+
+
+                <form id="login-form">
 
                     <label for="login-email">
                         Email
                     </label>
 
                     <input
-                        id="login-email"
                         type="email"
-                        autocomplete="email"
+                        id="login-email"
                         placeholder="you@example.com"
+                        autocomplete="email"
                         required
                     >
 
-                </div>
-
-
-                <div class="form-group">
 
                     <label for="login-password">
                         Password
                     </label>
 
                     <input
-                        id="login-password"
                         type="password"
-                        autocomplete="current-password"
+                        id="login-password"
                         placeholder="••••••••"
+                        autocomplete="current-password"
                         required
                     >
 
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
+                        Log in
+                    </button>
+
+                </form>
+
+
+                <div class="divider">
+                    <span>or</span>
                 </div>
 
 
                 <button
-                    type="submit"
-                    class="primary-button"
+                    id="show-signup"
+                    class="secondary-button"
+                    type="button"
                 >
-                    Log in
+                    Create HUNDO account
                 </button>
 
-            </form>
-
-
-            <div class="auth-divider">
-                <span>OR</span>
             </div>
 
-
-            <button
-                type="button"
-                id="show-signup"
-                class="secondary-button"
-            >
-                Create HUNDO account
-            </button>
-
         </div>
 
-    </div>
-
-</section>
+    </main>
 
 
-<!-- =====================================================
-     SIGNUP SCREEN
-===================================================== -->
+    <!-- =========================
+         SIGNUP SCREEN
+    ========================== -->
 
-<section
-    id="signup-screen"
-    class="screen hidden"
->
+    <main
+        id="signup-screen"
+        class="screen hidden"
+    >
 
-    <div class="auth-container">
-
-        <div class="brand">
-            <h1>HUNDO</h1>
-            <p>Join the challenge.</p>
-        </div>
-
-
-        <div class="auth-card">
+        <div class="auth-container">
 
             <button
-                type="button"
                 id="back-to-login"
                 class="back-button"
+                type="button"
             >
                 ← Back
             </button>
 
 
-            <h2>Create account</h2>
+            <div class="brand">
+
+                <div class="brand-mark">
+                    1
+                </div>
+
+                <h1>
+                    HUNDO
+                </h1>
+
+            </div>
 
 
-            <form id="signup-form">
+            <div class="auth-card">
 
-                <div class="form-group">
+                <h2>
+                    Create your account
+                </h2>
+
+                <p class="auth-subtitle">
+                    Your 100-day challenge starts here.
+                </p>
+
+
+                <form id="signup-form">
 
                     <label for="signup-name">
                         Name
                     </label>
 
                     <input
-                        id="signup-name"
                         type="text"
-                        autocomplete="name"
+                        id="signup-name"
                         placeholder="Your name"
+                        autocomplete="name"
                         required
                     >
 
-                </div>
-
-
-                <div class="form-group">
 
                     <label for="signup-age">
                         Age
                     </label>
 
                     <input
-                        id="signup-age"
                         type="number"
-                        inputmode="numeric"
+                        id="signup-age"
+                        placeholder="Your age"
                         min="1"
                         max="120"
-                        placeholder="Age"
+                        inputmode="numeric"
                         required
                     >
 
-                </div>
-
-
-                <div class="form-group">
 
                     <label for="signup-email">
                         Email
                     </label>
 
                     <input
-                        id="signup-email"
                         type="email"
-                        autocomplete="email"
+                        id="signup-email"
                         placeholder="you@example.com"
+                        autocomplete="email"
                         required
                     >
 
-                </div>
-
-
-                <div class="form-group">
 
                     <label for="signup-password">
                         Password
                     </label>
 
                     <input
-                        id="signup-password"
                         type="password"
-                        autocomplete="new-password"
-                        minlength="8"
+                        id="signup-password"
                         placeholder="Minimum 8 characters"
+                        minlength="8"
+                        autocomplete="new-password"
                         required
                     >
 
-                </div>
 
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
+                        Join HUNDO
+                    </button>
 
-                <button
-                    type="submit"
-                    class="primary-button"
-                >
-                    Join HUNDO
-                </button>
+                </form>
 
-            </form>
+            </div>
 
         </div>
 
-    </div>
-
-</section>
+    </main>
 
 
-<!-- =====================================================
-     MAIN APP
-===================================================== -->
-
-<section
-    id="app-screen"
-    class="app-screen hidden"
->
-
-    <!-- TOP BAR -->
-
-    <header class="top-bar">
-
-        <div class="top-bar-brand">
-            HUNDO
-        </div>
-
-        <div
-            id="challenge-day"
-            class="challenge-day"
-        >
-            Day 1 / 100
-        </div>
-
-    </header>
-
-
-    <!-- =================================================
-         HOME
-    ================================================= -->
+    <!-- =========================
+         APP SCREEN
+    ========================== -->
 
     <main
-        id="home-page"
-        class="page"
+        id="app-screen"
+        class="app-screen hidden"
     >
 
-        <section class="page-header">
+        <!-- TOP BAR -->
 
-            <h2>Home</h2>
+        <header class="top-bar">
 
-            <p>
-                Keep moving.
-            </p>
+            <div class="mini-logo">
+                HUNDO
+            </div>
 
-        </section>
-
-
-        <section class="stats-grid">
-
-            <div class="stat-card">
-
-                <span class="stat-label">
-                    🏃 Run + Walk
-                </span>
-
-                <strong id="home-runwalk-total">
-                    0.0 km
+            <div class="day-counter">
+                DAY
+                <strong id="current-day">
+                    1
                 </strong>
-
-                <span id="home-runwalk-rank">
-                    Rank —
-                </span>
-
+                /100
             </div>
 
-
-            <div class="stat-card">
-
-                <span class="stat-label">
-                    🚴 Cycling
-                </span>
-
-                <strong id="home-cycle-total">
-                    0.0 km
-                </strong>
-
-                <span id="home-cycle-rank">
-                    Rank —
-                </span>
-
-            </div>
-
-        </section>
+        </header>
 
 
-        <button
-            id="home-log-button"
-            type="button"
-            class="primary-button large-button"
-        >
-            + Log today's activity
-        </button>
+        <!-- PAGE CONTENT -->
+
+        <section id="page-content">
 
 
-        <section class="feed-section">
+            <!-- =========================
+                 HOME PAGE
+            ========================== -->
 
-            <div class="section-title">
+            <div
+                id="home-page"
+                class="page"
+            >
 
-                <h3>Community</h3>
+                <div class="welcome-section">
 
-            </div>
-
-
-            <div id="activity-feed">
-
-                <div class="empty-state">
-
-                    <p>
-                        No activities yet.
+                    <p class="eyebrow">
+                        WELCOME BACK
                     </p>
 
-                    <span>
-                        Be the first to post.
-                    </span>
+                    <h2>
+                        Let's get moving.
+                    </h2>
+
+                </div>
+
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+
+                        <span class="stat-icon">
+                            🏃
+                        </span>
+
+                        <span class="stat-label">
+                            RUN + WALK
+                        </span>
+
+                        <strong id="run-walk-total">
+                            0.0 km
+                        </strong>
+
+                        <small>
+                            Rank #—
+                        </small>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span class="stat-icon">
+                            🚴
+                        </span>
+
+                        <span class="stat-label">
+                            CYCLING
+                        </span>
+
+                        <strong id="cycling-total">
+                            0.0 km
+                        </strong>
+
+                        <small>
+                            Rank #—
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="log-activity-button"
+                    id="home-log-button"
+                    type="button"
+                >
+                    + Log activity
+                </button>
+
+
+                <section class="feed-section">
+
+                    <div class="section-heading">
+
+                        <h3>
+                            Community
+                        </h3>
+
+                    </div>
+
+
+                    <div id="activity-feed">
+
+                        <div class="empty-state">
+
+                            <div class="empty-icon">
+                                🏃
+                            </div>
+
+                            <h3>
+                                No activities yet
+                            </h3>
+
+                            <p>
+                                Be the first person to log today's activity.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- =========================
+                 LEADERBOARD
+            ========================== -->
+
+            <div
+                id="leaderboard-page"
+                class="page hidden"
+            >
+
+                <div class="page-heading">
+
+                    <p class="eyebrow">
+                        HUNDO
+                    </p>
+
+                    <h2>
+                        Leaderboard
+                    </h2>
+
+                </div>
+
+
+                <div class="leaderboard-tabs">
+
+                    <button
+                        class="leaderboard-tab active"
+                        type="button"
+                        data-board="runwalk"
+                    >
+                        🏃 Run + Walk
+                    </button>
+
+
+                    <button
+                        class="leaderboard-tab"
+                        type="button"
+                        data-board="cycle"
+                    >
+                        🚴 Cycling
+                    </button>
+
+                </div>
+
+
+                <div id="leaderboard-list">
+
+                    <div class="empty-state">
+
+                        <h3>
+                            Leaderboard coming up
+                        </h3>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </section>
 
-    </main>
+            <!-- =========================
+                 LOG PAGE
+            ========================== -->
 
-
-    <!-- =================================================
-         LEADERBOARD
-    ================================================= -->
-
-    <main
-        id="leaderboard-page"
-        class="page hidden"
-    >
-
-        <section class="page-header">
-
-            <h2>Leaderboard</h2>
-
-            <p id="leaderboard-day">
-                Day 1 / 100
-            </p>
-
-        </section>
-
-
-        <div class="leaderboard-tabs">
-
-            <button
-                type="button"
-                class="leaderboard-tab active"
-                data-board="runwalk"
+            <div
+                id="log-page"
+                class="page hidden"
             >
-                🏃 Run + Walk
-            </button>
 
+                <div class="page-heading">
 
-            <button
-                type="button"
-                class="leaderboard-tab"
-                data-board="cycle"
-            >
-                🚴 Cycling
-            </button>
+                    <p class="eyebrow">
+                        TODAY
+                    </p>
 
-        </div>
+                    <h2>
+                        Log activity
+                    </h2>
 
+                </div>
 
-        <div
-            id="leaderboard-list"
-            class="leaderboard-list"
-        >
 
-            <div class="empty-state">
+                <form id="activity-form">
 
-                <p>
-                    Leaderboard loading...
-                </p>
 
-            </div>
+                    <div class="activity-type-selector">
 
-        </div>
+                        <button
+                            type="button"
+                            class="activity-type active"
+                            data-type="run"
+                        >
+                            🏃
+                            <span>
+                                Run
+                            </span>
+                        </button>
 
-    </main>
 
+                        <button
+                            type="button"
+                            class="activity-type"
+                            data-type="walk"
+                        >
+                            🚶
+                            <span>
+                                Walk
+                            </span>
+                        </button>
 
-    <!-- =================================================
-         LOG ACTIVITY
-    ================================================= -->
 
-    <main
-        id="log-page"
-        class="page hidden"
-    >
+                        <button
+                            type="button"
+                            class="activity-type"
+                            data-type="cycle"
+                        >
+                            🚴
+                            <span>
+                                Cycle
+                            </span>
+                        </button>
 
-        <section class="page-header">
+                    </div>
 
-            <h2>Log Activity</h2>
 
-            <p>
-                Add today's movement.
-            </p>
-
-        </section>
-
-
-        <form id="activity-form">
-
-            <div class="activity-type-selector">
-
-                <button
-                    type="button"
-                    class="activity-type active"
-                    data-type="run"
-                >
-                    🏃 Run
-                </button>
-
-
-                <button
-                    type="button"
-                    class="activity-type"
-                    data-type="walk"
-                >
-                    🚶 Walk
-                </button>
-
-
-                <button
-                    type="button"
-                    class="activity-type"
-                    data-type="cycle"
-                >
-                    🚴 Cycle
-                </button>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="distance">
-                    Distance (km)
-                </label>
-
-                <input
-                    id="distance"
-                    type="number"
-                    inputmode="decimal"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="5.00"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="duration">
-                    Duration (minutes)
-                </label>
-
-                <input
-                    id="duration"
-                    type="number"
-                    inputmode="numeric"
-                    min="1"
-                    placeholder="Optional"
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="caption">
-                    Caption
-                </label>
-
-                <textarea
-                    id="caption"
-                    rows="4"
-                    maxlength="500"
-                    placeholder="How did it go?"
-                ></textarea>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="activity-photos">
-                    Photos
-                </label>
-
-                <input
-                    id="activity-photos"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                >
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="primary-button large-button"
-            >
-                Post Activity
-            </button>
-
-        </form>
-
-    </main>
-
-
-    <!-- =================================================
-         PROFILE
-    ================================================= -->
-
-    <main
-        id="profile-page"
-        class="page hidden"
-    >
-
-        <section class="profile-header">
-
-            <div class="profile-photo-wrapper">
-
-                <img
-                    id="profile-photo"
-                    class="profile-photo"
-                    src=""
-                    alt="Profile"
-                >
-
-            </div>
-
-
-            <div class="profile-info">
-
-                <h2 id="profile-name">
-                    HUNDO Athlete
-                </h2>
-
-                <p id="profile-age">
-                    Age —
-                </p>
-
-            </div>
-
-        </section>
-
-
-        <section class="stats-grid">
-
-            <div class="stat-card">
-
-                <span class="stat-label">
-                    🏃 Run + Walk
-                </span>
-
-                <strong id="profile-runwalk-total">
-                    0.0 km
-                </strong>
-
-                <span id="profile-runwalk-rank">
-                    Rank —
-                </span>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <span class="stat-label">
-                    🚴 Cycling
-                </span>
-
-                <strong id="profile-cycle-total">
-                    0.0 km
-                </strong>
-
-                <span id="profile-cycle-rank">
-                    Rank —
-                </span>
-
-            </div>
-
-        </section>
-
-
-        <section class="profile-section">
-
-            <h3>Weight</h3>
-
-            <form id="weight-form">
-
-                <div class="form-group">
-
-                    <label for="weight">
-                        Weight (kg)
+                    <label for="distance">
+                        Distance
                     </label>
 
+
+                    <div class="distance-input">
+
+                        <input
+                            type="number"
+                            id="distance"
+                            placeholder="0.0"
+                            min="0.01"
+                            step="0.01"
+                            inputmode="decimal"
+                            required
+                        >
+
+                        <span>
+                            km
+                        </span>
+
+                    </div>
+
+
+                    <label for="duration">
+
+                        Duration
+
+                        <span class="optional">
+                            Optional
+                        </span>
+
+                    </label>
+
+
                     <input
-                        id="weight"
                         type="number"
-                        inputmode="decimal"
-                        step="0.01"
-                        min="0.01"
-                        placeholder="Optional"
+                        id="duration"
+                        placeholder="Minutes"
+                        min="1"
+                        inputmode="numeric"
                     >
 
+
+                    <label for="caption">
+
+                        Caption
+
+                        <span class="optional">
+                            Optional
+                        </span>
+
+                    </label>
+
+
+                    <textarea
+                        id="caption"
+                        placeholder="How did it go?"
+                        rows="4"
+                    ></textarea>
+
+
+                    <button
+                        type="submit"
+                        class="primary-button"
+                    >
+                        Post activity
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- =========================
+                 PROFILE PAGE
+            ========================== -->
+
+            <div
+                id="profile-page"
+                class="page hidden"
+            >
+
+                <div class="profile-header">
+
+                    <div class="profile-picture">
+                        👤
+                    </div>
+
+
+                    <div>
+
+                        <h2 id="profile-name">
+                            Your Name
+                        </h2>
+
+                        <p id="profile-age">
+                            Age —
+                        </p>
+
+                    </div>
+
                 </div>
 
 
-                <button
-                    type="submit"
-                    class="secondary-button"
-                >
-                    Save weight
-                </button>
+                <div class="profile-stats">
 
-            </form>
+                    <div>
 
-        </section>
+                        <strong id="profile-run-walk">
+                            0.0 km
+                        </strong>
+
+                        <span>
+                            Run + Walk
+                        </span>
+
+                    </div>
 
 
-        <section class="profile-section">
+                    <div>
 
-            <h3>Your activity</h3>
+                        <strong id="profile-cycling">
+                            0.0 km
+                        </strong>
 
-            <div id="profile-activity-history">
+                        <span>
+                            Cycling
+                        </span>
 
-                <div class="empty-state">
+                    </div>
+
+                </div>
+
+
+                <section class="history-section">
+
+                    <h3>
+                        Activity history
+                    </h3>
+
+
+                    <div id="activity-history">
+
+                        <div class="empty-state">
+                            No activities yet.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="weight-section">
+
+                    <h3>
+                        Weight tracker
+                    </h3>
 
                     <p>
-                        No activities yet.
+                        Your weight data is private.
                     </p>
 
-                </div>
+                </section>
 
             </div>
 
         </section>
 
 
-        <button
-            id="logout-button"
-            type="button"
-            class="secondary-button"
-        >
-            Log out
-        </button>
+        <!-- =========================
+             BOTTOM NAVIGATION
+        ========================== -->
+
+        <nav class="bottom-nav">
+
+            <button
+                class="nav-item active"
+                data-page="home-page"
+                type="button"
+            >
+
+                <span>
+                    🏠
+                </span>
+
+                <small>
+                    Home
+                </small>
+
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="leaderboard-page"
+                type="button"
+            >
+
+                <span>
+                    🏆
+                </span>
+
+                <small>
+                    Leaderboard
+                </small>
+
+            </button>
+
+
+            <button
+                class="nav-item log-nav"
+                data-page="log-page"
+                type="button"
+            >
+
+                <span>
+                    ＋
+                </span>
+
+                <small>
+                    Log
+                </small>
+
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="profile-page"
+                type="button"
+            >
+
+                <span>
+                    👤
+                </span>
+
+                <small>
+                    Profile
+                </small>
+
+            </button>
+
+        </nav>
 
     </main>
 
 
-    <!-- =================================================
-         BOTTOM NAVIGATION
-    ================================================= -->
+    <!-- SUPABASE -->
 
-    <nav class="bottom-nav">
-
-        <button
-            type="button"
-            class="nav-item active"
-            data-page="home-page"
-        >
-            <span>🏠</span>
-            <small>Home</small>
-        </button>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+        crossorigin="anonymous"
+    ></script>
 
 
-        <button
-            type="button"
-            class="nav-item"
-            data-page="leaderboard-page"
-        >
-            <span>🏆</span>
-            <small>Leaderboard</small>
-        </button>
+    <!-- HUNDO -->
 
-
-        <button
-            type="button"
-            class="nav-item"
-            data-page="log-page"
-        >
-            <span>➕</span>
-            <small>Log</small>
-        </button>
-
-
-        <button
-            type="button"
-            class="nav-item"
-            data-page="profile-page"
-        >
-            <span>👤</span>
-            <small>Profile</small>
-        </button>
-
-    </nav>
-
-</section>
-
-
-<!-- =====================================================
-     SUPABASE
-===================================================== -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    crossorigin="anonymous"
-></script>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 
 </body>
+
 </html>
