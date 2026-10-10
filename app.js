@@ -2,9 +2,8 @@
    HUNDO — APP.JS
 ========================= */
 
-
 /* =========================
-   SUPABASE CONNECTION
+   SUPABASE CONFIG
 ========================= */
 
 const SUPABASE_URL = "https://vdrjynreworkifysxuhd.supabase.co";
@@ -12,49 +11,125 @@ const SUPABASE_URL = "https://vdrjynreworkifysxuhd.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_zq-tc602UONo5fg90pfebg_57-WM8cC";
 
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+let supabaseClient = null;
+
+
+/* =========================
+   SUPABASE LOADER
+========================= */
+
+function loadSupabase() {
+    return new Promise((resolve, reject) => {
+
+        // Already loaded
+        if (
+            window.supabase &&
+            typeof window.supabase.createClient === "function"
+        ) {
+            resolve();
+            return;
+        }
+
+        // Try loading Supabase from another CDN
+        const script = document.createElement("script");
+
+        script.src =
+            "https://unpkg.com/@supabase/supabase-js@2";
+
+        script.onload = () => {
+            if (
+                window.supabase &&
+                typeof window.supabase.createClient === "function"
+            ) {
+                resolve();
+            } else {
+                reject(
+                    new Error("Supabase loaded but could not be initialized.")
+                );
+            }
+        };
+
+        script.onerror = () => {
+            reject(
+                new Error("Could not load Supabase.")
+            );
+        };
+
+        document.head.appendChild(script);
+    });
+}
+
+
+async function getSupabase() {
+
+    if (supabaseClient) {
+        return supabaseClient;
+    }
+
+    await loadSupabase();
+
+    supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+    return supabaseClient;
+}
 
 
 /* =========================
    SCREEN ELEMENTS
 ========================= */
 
-const authScreen = document.getElementById("auth-screen");
-const signupScreen = document.getElementById("signup-screen");
-const appScreen = document.getElementById("app-screen");
+const authScreen =
+    document.getElementById("auth-screen");
 
-const loginForm = document.getElementById("login-form");
-const signupForm = document.getElementById("signup-form");
+const signupScreen =
+    document.getElementById("signup-screen");
 
-const showSignupButton = document.getElementById("show-signup");
-const backToLoginButton = document.getElementById("back-to-login");
+const appScreen =
+    document.getElementById("app-screen");
+
+const loginForm =
+    document.getElementById("login-form");
+
+const signupForm =
+    document.getElementById("signup-form");
+
+const showSignupButton =
+    document.getElementById("show-signup");
+
+const backToLoginButton =
+    document.getElementById("back-to-login");
 
 
 /* =========================
    LOGIN / SIGNUP SCREEN
 ========================= */
 
+// CREATE ACCOUNT BUTTON
 showSignupButton.addEventListener("click", () => {
 
     authScreen.classList.add("hidden");
+
     signupScreen.classList.remove("hidden");
 
 });
 
 
+// BACK TO LOGIN
 backToLoginButton.addEventListener("click", () => {
 
     signupScreen.classList.add("hidden");
+
     authScreen.classList.remove("hidden");
 
 });
 
 
 /* =========================
-   REAL SUPABASE LOGIN
+   LOGIN
 ========================= */
 
 loginForm.addEventListener("submit", async (event) => {
@@ -67,40 +142,51 @@ loginForm.addEventListener("submit", async (event) => {
     const password =
         document.getElementById("login-password").value;
 
+    try {
 
-    const { error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+        const supabase = await getSupabase();
 
+        const { error } =
+            await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
-    if (error) {
+        if (error) {
+            alert(error.message);
+            return;
+        }
 
-        alert(error.message);
-        return;
+        openApp();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to connect to HUNDO right now. Please try again."
+        );
 
     }
-
-
-    openApp();
 
 });
 
 
 /* =========================
-   REAL SUPABASE SIGNUP
+   SIGNUP
 ========================= */
 
 signupForm.addEventListener("submit", async (event) => {
 
     event.preventDefault();
 
-
     const name =
         document.getElementById("signup-name").value.trim();
 
     const age =
-        Number(document.getElementById("signup-age").value);
+        Number(
+            document.getElementById("signup-age").value
+        );
 
     const email =
         document.getElementById("signup-email").value.trim();
@@ -109,82 +195,107 @@ signupForm.addEventListener("submit", async (event) => {
         document.getElementById("signup-password").value;
 
 
-    /* Basic validation */
+    /* =========================
+       VALIDATION
+    ========================= */
 
     if (!name || !age || !email || !password) {
 
         alert("Please fill in all fields.");
-        return;
 
+        return;
     }
 
 
     if (age < 1 || age > 120) {
 
         alert("Please enter a valid age.");
-        return;
 
+        return;
     }
 
 
     if (password.length < 8) {
 
-        alert("Password must be at least 8 characters.");
-        return;
+        alert(
+            "Password must be at least 8 characters."
+        );
 
+        return;
     }
 
 
-    /* Create Supabase account */
+    try {
 
-    const { data, error } =
-        await supabase.auth.signUp({
-
-            email: email,
-            password: password
-
-        });
+        const supabase = await getSupabase();
 
 
-    if (error) {
+        /* =========================
+           CREATE AUTH ACCOUNT
+        ========================= */
 
-        alert(error.message);
-        return;
+        const { data, error } =
+            await supabase.auth.signUp({
+                email: email,
+                password: password
+            });
+
+
+        if (error) {
+
+            alert(error.message);
+
+            return;
+        }
+
+
+        if (!data.user) {
+
+            alert(
+                "Account could not be created."
+            );
+
+            return;
+        }
+
+
+        /* =========================
+           SAVE PROFILE
+        ========================= */
+
+        const { error: profileError } =
+            await supabase
+                .from("profiles")
+                .update({
+                    name: name,
+                    age: age
+                })
+                .eq("id", data.user.id);
+
+
+        if (profileError) {
+
+            alert(profileError.message);
+
+            return;
+        }
+
+
+        /* =========================
+           OPEN APP
+        ========================= */
+
+        openApp();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to connect to HUNDO right now. Please try again."
+        );
 
     }
-
-
-    if (!data.user) {
-
-        alert("Account could not be created.");
-        return;
-
-    }
-
-
-    /* Save profile information */
-
-    const { error: profileError } =
-        await supabase
-            .from("profiles")
-            .update({
-
-                name: name,
-                age: age
-
-            })
-            .eq("id", data.user.id);
-
-
-    if (profileError) {
-
-        alert(profileError.message);
-        return;
-
-    }
-
-
-    openApp();
 
 });
 
@@ -223,16 +334,12 @@ navItems.forEach((navItem) => {
             navItem.dataset.page;
 
 
-        /* Hide every page */
-
         pages.forEach((page) => {
 
             page.classList.add("hidden");
 
         });
 
-
-        /* Show selected page */
 
         const selectedPage =
             document.getElementById(pageId);
@@ -244,8 +351,6 @@ navItems.forEach((navItem) => {
 
         }
 
-
-        /* Update active navigation item */
 
         navItems.forEach((item) => {
 
@@ -304,7 +409,6 @@ homeLogButton.addEventListener("click", () => {
 const activityTypes =
     document.querySelectorAll(".activity-type");
 
-
 let selectedActivityType = "run";
 
 
@@ -324,12 +428,6 @@ activityTypes.forEach((button) => {
 
         selectedActivityType =
             button.dataset.type;
-
-
-        console.log(
-            "Selected activity:",
-            selectedActivityType
-        );
 
     });
 
@@ -360,12 +458,10 @@ activityForm.addEventListener("submit", (event) => {
 
 
     console.log({
-
         activityType: selectedActivityType,
         distance: distance,
         duration: duration,
         caption: caption
-
     });
 
 
@@ -403,3 +499,10 @@ leaderboardTabs.forEach((tab) => {
     });
 
 });
+
+
+/* =========================
+   STARTUP
+========================= */
+
+console.log("HUNDO loaded successfully.");
