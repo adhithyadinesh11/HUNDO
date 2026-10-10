@@ -39,7 +39,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
     font: inherit;
 }
 
@@ -50,7 +51,8 @@ button {
 
 input,
 textarea,
-button {
+button,
+select {
     appearance: none;
 }
 
@@ -73,6 +75,8 @@ button {
 
     --muted: #999999;
     --light-muted: #666666;
+
+    --green: #35d07f;
 }
 
 
@@ -89,9 +93,7 @@ button {
     justify-content: center;
     align-items: center;
 
-    padding:
-        24px
-        20px;
+    padding: 24px 20px;
 
     overflow-x: hidden;
 }
@@ -202,7 +204,8 @@ label {
 }
 
 input,
-textarea {
+textarea,
+select {
     width: 100%;
 
     min-width: 0;
@@ -230,12 +233,17 @@ textarea::placeholder {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
     border-color: #777777;
 }
 
 textarea {
     resize: vertical;
+}
+
+select {
+    cursor: pointer;
 }
 
 
@@ -355,12 +363,13 @@ textarea {
     align-items: center;
     justify-content: space-between;
 
-    gap: 20px;
+    gap: 12px;
 
     padding:
         env(safe-area-inset-top)
-        20px
-        0;
+        max(20px, env(safe-area-inset-left))
+        0
+        max(20px, env(safe-area-inset-right));
 
     height:
         calc(65px + env(safe-area-inset-top));
@@ -376,12 +385,16 @@ textarea {
     -webkit-backdrop-filter: blur(10px);
 
     z-index: 100;
+
+    overflow: visible;
 }
 
 .mini-logo {
     flex: 0 0 auto;
 
     white-space: nowrap;
+
+    overflow: visible;
 
     font-size: 20px;
 
@@ -404,6 +417,8 @@ textarea {
 
     white-space: nowrap;
 
+    overflow: visible;
+
     color: var(--muted);
 
     font-size: 12px;
@@ -417,6 +432,24 @@ textarea {
     color: var(--white);
 
     font-weight: 800;
+}
+
+.streak-counter {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 2px;
+
+    margin-left: 7px;
+
+    color: var(--white);
+
+    font-weight: 700;
+}
+
+.streak-counter strong {
+    color: var(--white);
 }
 
 
@@ -451,12 +484,16 @@ textarea {
 
     from {
         opacity: 0;
-        transform: translateY(4px);
+
+        transform:
+            translateY(4px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+
+        transform:
+            translateY(0);
     }
 
 }
@@ -566,7 +603,7 @@ textarea {
 
 
 /* =====================================================
-   LOG BUTTON
+   HOME LOG BUTTON
 ===================================================== */
 
 .log-activity-button {
@@ -640,7 +677,7 @@ textarea {
 
 
 /* =====================================================
-   LEADERBOARD
+   LEADERBOARD TABS
 ===================================================== */
 
 .leaderboard-tabs {
@@ -689,22 +726,263 @@ textarea {
 
 
 /* =====================================================
+   COOL LEADERBOARD
+===================================================== */
+
+.leaderboard-list {
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.leaderboard-row {
+    width: 100%;
+
+    min-height: 74px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #181818,
+            #111111
+        );
+
+    border: 1px solid #292929;
+
+    border-radius: 16px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease;
+}
+
+.leaderboard-row:active {
+    transform: scale(0.985);
+}
+
+.leaderboard-row.current-user {
+    border-color: #5a5a5a;
+
+    background:
+        linear-gradient(
+            135deg,
+            #202020,
+            #151515
+        );
+}
+
+.leaderboard-row.top-one {
+    border-color: #454545;
+
+    min-height: 82px;
+}
+
+.leaderboard-rank {
+    width: 30px;
+
+    flex: 0 0 30px;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 15px;
+
+    font-weight: 900;
+}
+
+.leaderboard-row.top-one .leaderboard-rank {
+    font-size: 22px;
+}
+
+.leaderboard-avatar {
+    width: 48px !important;
+    height: 48px !important;
+
+    min-width: 48px !important;
+    min-height: 48px !important;
+
+    max-width: 48px !important;
+    max-height: 48px !important;
+
+    flex: 0 0 48px;
+
+    border-radius: 50% !important;
+
+    overflow: hidden;
+
+    object-fit: cover !important;
+
+    display: flex !important;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #242424;
+
+    border: 1px solid #3a3a3a;
+
+    color: #999999;
+
+    font-size: 20px;
+}
+
+.leaderboard-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+
+    max-width: 100% !important;
+    max-height: 100% !important;
+
+    display: block;
+
+    object-fit: cover !important;
+
+    border-radius: 50% !important;
+}
+
+.leaderboard-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.leaderboard-name {
+    color: var(--white);
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    line-height: 1.2;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.leaderboard-you {
+    display: inline-block;
+
+    margin-left: 5px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+.leaderboard-subtitle {
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-top: 4px;
+}
+
+.leaderboard-distance {
+    flex: 0 0 auto;
+
+    text-align: right;
+}
+
+.leaderboard-distance strong {
+    display: block;
+
+    color: var(--white);
+
+    font-size: 18px;
+
+    font-weight: 900;
+
+    letter-spacing: -0.5px;
+
+    white-space: nowrap;
+}
+
+.leaderboard-distance span {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    margin-top: 2px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+.leaderboard-medal {
+    font-size: 21px;
+
+    line-height: 1;
+}
+
+
+/* =====================================================
    ACTIVITY LOG
 ===================================================== */
 
-.activity-type-selector {
+.activity-form {
+    width: 100%;
+}
+
+.form-group {
+    width: 100%;
+
+    margin-bottom: 22px;
+}
+
+
+/* =====================================================
+   ACTIVITY TYPE
+===================================================== */
+
+.activity-type-grid {
     display: grid;
 
     grid-template-columns:
         repeat(3, minmax(0, 1fr));
 
     gap: 8px;
-
-    margin-bottom: 25px;
 }
 
-.activity-type {
+.activity-type-button {
     min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 82px;
 
     background: var(--card);
 
@@ -714,24 +992,43 @@ textarea {
 
     border-radius: 13px;
 
-    padding: 15px 8px;
+    padding: 12px 8px;
 
     font-weight: 700;
+
+    transition:
+        background 0.15s,
+        color 0.15s,
+        border-color 0.15s,
+        transform 0.15s;
 }
 
-.activity-type span {
-    display: block;
+.activity-type-button span {
+    font-size: 24px;
 
+    line-height: 1;
+}
+
+.activity-type-button strong {
     font-size: 12px;
-
-    margin-top: 6px;
 }
 
-.activity-type.active {
+.activity-type-button.active {
     background: var(--white);
 
     color: var(--black);
+
+    border-color: var(--white);
 }
+
+.activity-type-button:active {
+    transform: scale(0.97);
+}
+
+
+/* =====================================================
+   DISTANCE
+===================================================== */
 
 .distance-input {
     position: relative;
@@ -745,9 +1042,11 @@ textarea {
     position: absolute;
 
     right: 14px;
+
     top: 50%;
 
-    transform: translateY(-50%);
+    transform:
+        translateY(-50%);
 
     color: var(--muted);
 
@@ -755,6 +1054,243 @@ textarea {
 
     pointer-events: none;
 }
+
+
+/* =====================================================
+   DURATION PICKER
+===================================================== */
+
+.duration-picker {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+}
+
+.duration-column {
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+.duration-column select {
+    width: 100%;
+
+    height: 58px;
+
+    padding:
+        8px
+        30px
+        8px
+        10px;
+
+    text-align: center;
+
+    font-size: 19px;
+
+    font-weight: 800;
+
+    color: var(--white);
+
+    background: #111111;
+
+    border: 1px solid var(--border);
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    /*
+       Keeps the native scroll/select behavior
+       on iPhone and desktop.
+    */
+}
+
+.duration-column span {
+    color: var(--muted);
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   ACTIVITY PHOTOS
+===================================================== */
+
+.activity-photo-upload {
+    width: 100%;
+
+    min-height: 105px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    margin: 0;
+
+    padding: 18px;
+
+    background: #111111;
+
+    border: 1px dashed #3a3a3a;
+
+    border-radius: 14px;
+
+    color: var(--white);
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.15s,
+        background 0.15s;
+}
+
+.activity-photo-upload:hover {
+    background: #151515;
+
+    border-color: #555555;
+}
+
+.activity-photo-upload:active {
+    transform: scale(0.99);
+}
+
+.activity-photo-upload-icon {
+    font-size: 27px;
+
+    line-height: 1;
+}
+
+.activity-photo-upload strong {
+    font-size: 13px;
+}
+
+.activity-photo-upload small {
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+.activity-photo-preview {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+
+    margin-top: 10px;
+}
+
+.activity-photo-preview:empty {
+    display: none;
+}
+
+.activity-photo-preview-item {
+    position: relative;
+
+    aspect-ratio: 1 / 1;
+
+    overflow: hidden;
+
+    border-radius: 12px;
+
+    background: #171717;
+
+    border: 1px solid var(--border);
+}
+
+.activity-photo-preview-item img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+.activity-photo-remove {
+    position: absolute;
+
+    top: 6px;
+    right: 6px;
+
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 2px solid #0b0b0b;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.92);
+
+    color: #0b0b0b;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    z-index: 3;
+}
+
+
+/* =====================================================
+   POST ACTIVITY
+===================================================== */
+
+.post-activity-button {
+    margin-top: 8px;
+
+    min-height: 52px;
+
+    font-size: 15px;
+}
+
+.post-activity-button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =====================================================
+   OPTIONAL LABEL
+===================================================== */
 
 .optional {
     color: var(--light-muted);
@@ -819,13 +1355,15 @@ textarea {
     display: block;
 
     object-fit: cover;
+
+    border-radius: 50%;
 }
 
 .profile-photo-button {
     position: absolute;
 
-    right: -8px;
-    bottom: -4px;
+    right: -9px;
+    bottom: -5px;
 
     width: 32px;
     height: 32px;
@@ -835,6 +1373,8 @@ textarea {
     align-items: center;
     justify-content: center;
 
+    padding: 0;
+
     border-radius: 50%;
 
     border: 4px solid var(--black);
@@ -843,15 +1383,13 @@ textarea {
 
     color: var(--black);
 
-    font-size: 21px;
+    font-size: 22px;
 
     font-weight: 500;
 
     line-height: 1;
 
-    padding: 0;
-
-    z-index: 5;
+    z-index: 20;
 }
 
 .profile-photo-button:active {
@@ -929,6 +1467,7 @@ textarea {
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     gap: 15px;
@@ -1057,7 +1596,80 @@ textarea {
 
 
 /* =====================================================
-   BOTTOM NAV
+   ACTIVITY HISTORY CARDS
+===================================================== */
+
+.activity-history-item {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px;
+
+    margin-bottom: 8px;
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+}
+
+.activity-history-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #222222;
+
+    border-radius: 50%;
+
+    font-size: 19px;
+}
+
+.activity-history-info {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.activity-history-info strong {
+    display: block;
+
+    font-size: 13px;
+}
+
+.activity-history-info small {
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    margin-top: 4px;
+}
+
+.activity-history-distance {
+    flex: 0 0 auto;
+
+    font-size: 14px;
+
+    font-weight: 900;
+}
+
+
+/* =====================================================
+   BOTTOM NAVIGATION
 ===================================================== */
 
 .bottom-nav {
@@ -1092,6 +1704,7 @@ textarea {
 
 .nav-item {
     width: 100%;
+
     height: 76px;
 
     min-width: 0;
@@ -1131,6 +1744,8 @@ textarea {
     line-height: 1;
 
     text-align: center;
+
+    flex: 0 0 28px;
 }
 
 .nav-item small {
@@ -1153,11 +1768,16 @@ textarea {
 
 
 /* =====================================================
-   LOG BUTTON IN NAV
+   LOG BUTTON IN BOTTOM NAV
+   FIXED ALIGNMENT
 ===================================================== */
 
 .log-nav {
     overflow: visible;
+
+    gap: 5px;
+
+    justify-content: center;
 }
 
 .log-nav .log-icon {
@@ -1183,129 +1803,22 @@ textarea {
 
     line-height: 1;
 
-    margin-top: -22px;
+    /*
+       IMPORTANT:
+       Removed the old negative margin.
+       This keeps the Log button aligned
+       with the other bottom-nav icons.
+    */
+    margin-top: 0;
 }
 
 .log-nav small {
-    margin-top: -1px;
+    margin-top: 0;
 }
 
 
 /* =====================================================
-   MOBILE
-===================================================== */
-
-@media (max-width: 699px) {
-
-    .top-bar {
-        padding-left:
-            max(20px, env(safe-area-inset-left));
-
-        padding-right:
-            max(20px, env(safe-area-inset-right));
-    }
-
-
-    #page-content {
-        padding-left:
-            max(20px, env(safe-area-inset-left));
-
-        padding-right:
-            max(20px, env(safe-area-inset-right));
-    }
-
-}
-
-
-/* =====================================================
-   SMALL PHONES
-===================================================== */
-
-@media (max-width: 380px) {
-
-    .top-bar {
-        gap: 10px;
-
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
-    .mini-logo {
-        font-size: 18px;
-    }
-
-    .day-counter {
-        font-size: 11px;
-    }
-
-    #page-content {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-
-    .stats-grid {
-        gap: 8px;
-    }
-
-    .stat-card {
-        padding: 14px;
-    }
-
-    .stat-card strong {
-        font-size: 21px;
-    }
-
-    .profile-avatar-wrap,
-    .profile-picture {
-        width: 82px;
-        height: 82px;
-    }
-
-    .profile-avatar-wrap {
-        flex-basis: 82px;
-    }
-
-    .profile-photo-button {
-        width: 30px;
-        height: 30px;
-
-        right: -7px;
-        bottom: -3px;
-
-        font-size: 19px;
-    }
-
-}
-
-
-/* =====================================================
-   DESKTOP
-===================================================== */
-
-@media (min-width: 700px) {
-
-    .bottom-nav {
-        left: 50%;
-        right: auto;
-
-        transform: translateX(-50%);
-
-        width: 650px;
-
-        border-left: 1px solid var(--border);
-        border-right: 1px solid var(--border);
-
-        border-radius:
-            18px
-            18px
-            0
-            0;
-    }
-
-}
-
-/* =====================================================
-   HUNDO STARTUP SPLASH
+   STARTUP SPLASH
 ===================================================== */
 
 #hundo-splash {
@@ -1320,6 +1833,7 @@ textarea {
     flex-direction: column;
 
     align-items: center;
+
     justify-content: center;
 
     background: #0b0b0b;
@@ -1331,7 +1845,9 @@ textarea {
 
 #hundo-splash.splash-hidden {
     opacity: 0;
+
     visibility: hidden;
+
     pointer-events: none;
 }
 
@@ -1402,11 +1918,13 @@ textarea {
 
     from {
         width: 0;
+
         opacity: 0;
     }
 
     to {
         width: 90px;
+
         opacity: 1;
     }
 
@@ -1414,265 +1932,42 @@ textarea {
 
 
 /* =====================================================
-   TOP BAR / STREAK
-===================================================== */
-
-.top-bar {
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 12px;
-
-    padding-left:
-        max(20px, env(safe-area-inset-left));
-
-    padding-right:
-        max(20px, env(safe-area-inset-right));
-
-    overflow: visible;
-}
-
-.mini-logo {
-    flex: 0 0 auto;
-
-    white-space: nowrap;
-
-    overflow: visible;
-
-    font-size: 20px;
-
-    font-weight: 900;
-
-    letter-spacing: -1px;
-}
-
-.day-counter {
-    flex: 0 0 auto;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 4px;
-
-    white-space: nowrap;
-
-    overflow: visible;
-
-    font-size: 12px;
-}
-
-.streak-counter {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 2px;
-
-    margin-left: 7px;
-
-    color: #ffffff;
-
-    font-weight: 700;
-}
-
-.streak-counter strong {
-    color: #ffffff;
-}
-
-
-/* =====================================================
-   PROFILE AVATAR
-===================================================== */
-
-.profile-avatar-wrap {
-    position: relative;
-
-    width: 92px;
-    height: 92px;
-
-    flex: 0 0 92px;
-}
-
-.profile-picture {
-    width: 92px;
-    height: 92px;
-
-    border-radius: 50%;
-
-    overflow: hidden;
-
-    background: #171717;
-
-    border: 1px solid #292929;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: 30px;
-}
-
-.profile-picture img {
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    border-radius: 50%;
-}
-
-.profile-photo-button {
-    position: absolute;
-
-    right: -9px;
-    bottom: -5px;
-
-    width: 32px;
-    height: 32px;
-
-    padding: 0;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    border: 4px solid #0b0b0b;
-
-    background: #ffffff;
-
-    color: #0b0b0b;
-
-    font-size: 22px;
-
-    line-height: 1;
-
-    z-index: 20;
-}
-
-
-/* =====================================================
-   PROFILE EDITOR
-===================================================== */
-
-.edit-profile-button {
-    width: 100%;
-
-    padding: 13px 16px;
-
-    margin-bottom: 18px;
-
-    background: transparent;
-
-    color: #ffffff;
-
-    border: 1px solid #292929;
-
-    border-radius: 12px;
-
-    font-weight: 800;
-}
-
-.profile-editor {
-    background: #171717;
-
-    border: 1px solid #292929;
-
-    border-radius: 16px;
-
-    padding: 18px;
-
-    margin-bottom: 22px;
-}
-
-.profile-editor-header {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 5px;
-}
-
-.close-profile-editor {
-    width: 32px;
-    height: 32px;
-
-    border: none;
-
-    border-radius: 50%;
-
-    background: #242424;
-
-    color: #ffffff;
-
-    font-size: 21px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-}
-
-
-/* =====================================================
-   LEADERBOARD AVATARS
-===================================================== */
-
-/*
-   VERY IMPORTANT:
-   Profile photos in leaderboard MUST be constrained.
-*/
-
-.leaderboard-avatar {
-    width: 48px !important;
-    height: 48px !important;
-
-    min-width: 48px !important;
-    min-height: 48px !important;
-
-    max-width: 48px !important;
-    max-height: 48px !important;
-
-    border-radius: 50% !important;
-
-    object-fit: cover !important;
-
-    display: block !important;
-
-    overflow: hidden;
-
-    flex-shrink: 0;
-}
-
-.leaderboard-avatar img {
-    width: 100% !important;
-    height: 100% !important;
-
-    max-width: 100% !important;
-    max-height: 100% !important;
-
-    object-fit: cover !important;
-
-    border-radius: 50% !important;
-}
-
-
-/* =====================================================
    MOBILE
 ===================================================== */
 
+@media (max-width: 699px) {
+
+    .top-bar {
+        padding-left:
+            max(20px, env(safe-area-inset-left));
+
+        padding-right:
+            max(20px, env(safe-area-inset-right));
+    }
+
+    #page-content {
+        padding-left:
+            max(20px, env(safe-area-inset-left));
+
+        padding-right:
+            max(20px, env(safe-area-inset-right));
+    }
+
+}
+
+
+/* =====================================================
+   SMALL PHONES
+===================================================== */
+
 @media (max-width: 380px) {
+
+    .top-bar {
+        gap: 10px;
+
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 
     .mini-logo {
         font-size: 18px;
@@ -1686,6 +1981,23 @@ textarea {
         margin-left: 4px;
     }
 
+    #page-content {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .stats-grid {
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 14px;
+    }
+
+    .stat-card strong {
+        font-size: 21px;
+    }
+
     .profile-avatar-wrap,
     .profile-picture {
         width: 82px;
@@ -1694,6 +2006,83 @@ textarea {
 
     .profile-avatar-wrap {
         flex-basis: 82px;
+    }
+
+    .profile-photo-button {
+        width: 30px;
+        height: 30px;
+
+        right: -7px;
+        bottom: -3px;
+
+        font-size: 19px;
+    }
+
+    .duration-picker {
+        gap: 5px;
+    }
+
+    .duration-column select {
+        height: 54px;
+
+        font-size: 17px;
+    }
+
+    .duration-column span {
+        font-size: 9px;
+    }
+
+    .leaderboard-row {
+        padding:
+            10px
+            11px;
+
+        gap: 9px;
+    }
+
+    .leaderboard-avatar {
+        width: 42px !important;
+        height: 42px !important;
+
+        min-width: 42px !important;
+        min-height: 42px !important;
+
+        max-width: 42px !important;
+        max-height: 42px !important;
+
+        flex-basis: 42px;
+    }
+
+    .leaderboard-distance strong {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =====================================================
+   DESKTOP
+===================================================== */
+
+@media (min-width: 700px) {
+
+    .bottom-nav {
+        left: 50%;
+        right: auto;
+
+        transform:
+            translateX(-50%);
+
+        width: 650px;
+
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+
+        border-radius:
+            18px
+            18px
+            0
+            0;
     }
 
 }
