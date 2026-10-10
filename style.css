@@ -2086,3 +2086,139 @@ select {
     }
 
 }
+
+/* =====================================================
+   HUNDO COMMUNITY FEED FIX
+   Only affects the Community section
+===================================================== */
+
+#activity-feed {
+    width: 100%;
+    min-width: 0;
+}
+
+#activity-feed .activity-card {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 14px;
+}
+
+#activity-feed .activity-card-header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 15px 16px;
+}
+
+#activity-feed .feed-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#activity-feed .feed-avatar img {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+#activity-feed .activity-user {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+#activity-feed .activity-user strong {
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+#activity-feed .activity-user span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+#activity-feed .activity-main {
+    padding: 0 16px 16px;
+    min-width: 0;
+}
+
+#activity-feed .activity-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#activity-feed .activity-type-name {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+#activity-feed .activity-distance {
+    font-weight: 800;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+#activity-feed .activity-meta {
+    display: flex;
+    gap: 12px;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+#activity-feed .activity-caption {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+#activity-feed .activity-photo-grid {
+    width: 100%;
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    margin-top: 14px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+#activity-feed .activity-photo-grid img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 280px;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+#activity-feed .activity-delete {
+    margin-top: 12px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 4px 0;
+}
