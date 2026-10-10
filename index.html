@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,10 +9,7 @@
         content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
-    <meta
-        name="theme-color"
-        content="#0b0b0b"
-    >
+    <meta name="theme-color" content="#0b0b0b">
 
     <meta
         name="apple-mobile-web-app-capable"
@@ -34,21 +30,38 @@
 
     <meta
         name="description"
-        content="HUNDO — 100 days. One challenge. Your distance."
+        content="HUNDO — 100 days. One challenge."
     >
 
     <link rel="stylesheet" href="style.css">
-
 </head>
-
 
 <body>
 
-    <!-- =========================
-         AUTH SCREEN
-    ========================== -->
+    <!-- =====================================================
+         SPLASH
+    ====================================================== -->
 
-    <main id="auth-screen" class="screen">
+    <div id="splash-screen" class="splash-screen">
+
+        <div class="splash-logo">
+
+            <div class="splash-one">1</div>
+
+            <div class="splash-word">
+                HUNDO
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         AUTH SCREEN
+    ====================================================== -->
+
+    <main id="auth-screen" class="screen hidden">
 
         <div class="auth-container">
 
@@ -58,12 +71,9 @@
                     1
                 </div>
 
-                <h1>
-                    HUNDO
-                </h1>
+                <h1>HUNDO</h1>
 
             </div>
-
 
             <p class="tagline">
                 100 days. One challenge.
@@ -80,6 +90,8 @@
                     Track your distance. Challenge your friends.
                 </p>
 
+
+                <!-- LOGIN -->
 
                 <form id="login-form">
 
@@ -139,14 +151,11 @@
     </main>
 
 
-    <!-- =========================
-         SIGNUP SCREEN
-    ========================== -->
+    <!-- =====================================================
+         SIGNUP
+    ====================================================== -->
 
-    <main
-        id="signup-screen"
-        class="screen hidden"
-    >
+    <main id="signup-screen" class="screen hidden">
 
         <div class="auth-container">
 
@@ -165,9 +174,7 @@
                     1
                 </div>
 
-                <h1>
-                    HUNDO
-                </h1>
+                <h1>HUNDO</h1>
 
             </div>
 
@@ -256,14 +263,12 @@
     </main>
 
 
-    <!-- =========================
-         APP SCREEN
-    ========================== -->
+    <!-- =====================================================
+         APP
+    ====================================================== -->
 
-    <main
-        id="app-screen"
-        class="app-screen hidden"
-    >
+    <main id="app-screen" class="app-screen hidden">
+
 
         <!-- TOP BAR -->
 
@@ -275,9 +280,7 @@
 
             <div class="day-counter">
                 DAY
-                <strong id="current-day">
-                    1
-                </strong>
+                <strong id="current-day">1</strong>
                 /100
             </div>
 
@@ -289,9 +292,9 @@
         <section id="page-content">
 
 
-            <!-- =========================
-                 HOME PAGE
-            ========================== -->
+            <!-- =================================================
+                 HOME
+            ================================================== -->
 
             <div
                 id="home-page"
@@ -304,7 +307,7 @@
                         WELCOME BACK
                     </p>
 
-                    <h2>
+                    <h2 id="home-greeting">
                         Let's get moving.
                     </h2>
 
@@ -327,7 +330,7 @@
                             0.0 km
                         </strong>
 
-                        <small>
+                        <small id="run-walk-rank">
                             Rank #—
                         </small>
 
@@ -348,7 +351,7 @@
                             0.0 km
                         </strong>
 
-                        <small>
+                        <small id="cycling-rank">
                             Rank #—
                         </small>
 
@@ -369,18 +372,12 @@
                 <section class="feed-section">
 
                     <div class="section-heading">
-
-                        <h3>
-                            Community
-                        </h3>
-
+                        <h3>Community</h3>
                     </div>
-
 
                     <div id="activity-feed">
 
                         <div class="empty-state">
-
                             <div class="empty-icon">
                                 🏃
                             </div>
@@ -392,7 +389,6 @@
                             <p>
                                 Be the first person to log today's activity.
                             </p>
-
                         </div>
 
                     </div>
@@ -402,9 +398,9 @@
             </div>
 
 
-            <!-- =========================
+            <!-- =================================================
                  LEADERBOARD
-            ========================== -->
+            ================================================== -->
 
             <div
                 id="leaderboard-page"
@@ -421,6 +417,10 @@
                         Leaderboard
                     </h2>
 
+                    <p class="page-description">
+                        Everyone in the challenge. Every kilometre counts.
+                    </p>
+
                 </div>
 
 
@@ -434,7 +434,6 @@
                         🏃 Run + Walk
                     </button>
 
-
                     <button
                         class="leaderboard-tab"
                         type="button"
@@ -446,24 +445,14 @@
                 </div>
 
 
-                <div id="leaderboard-list">
-
-                    <div class="empty-state">
-
-                        <h3>
-                            Leaderboard coming up
-                        </h3>
-
-                    </div>
-
-                </div>
+                <div id="leaderboard-list"></div>
 
             </div>
 
 
-            <!-- =========================
-                 LOG PAGE
-            ========================== -->
+            <!-- =================================================
+                 LOG ACTIVITY
+            ================================================== -->
 
             <div
                 id="log-page"
@@ -480,11 +469,17 @@
                         Log activity
                     </h2>
 
+                    <p class="page-description">
+                        Add what you did today. It updates your HUNDO totals instantly.
+                    </p>
+
                 </div>
 
 
                 <form id="activity-form">
 
+
+                    <!-- ACTIVITY TYPE -->
 
                     <div class="activity-type-selector">
 
@@ -493,7 +488,10 @@
                             class="activity-type active"
                             data-type="run"
                         >
-                            🏃
+                            <span class="activity-emoji">
+                                🏃
+                            </span>
+
                             <span>
                                 Run
                             </span>
@@ -505,7 +503,10 @@
                             class="activity-type"
                             data-type="walk"
                         >
-                            🚶
+                            <span class="activity-emoji">
+                                🚶
+                            </span>
+
                             <span>
                                 Walk
                             </span>
@@ -517,7 +518,10 @@
                             class="activity-type"
                             data-type="cycle"
                         >
-                            🚴
+                            <span class="activity-emoji">
+                                🚴
+                            </span>
+
                             <span>
                                 Cycle
                             </span>
@@ -526,10 +530,11 @@
                     </div>
 
 
+                    <!-- DISTANCE -->
+
                     <label for="distance">
                         Distance
                     </label>
-
 
                     <div class="distance-input">
 
@@ -543,54 +548,123 @@
                             required
                         >
 
-                        <span>
-                            km
-                        </span>
+                        <span>km</span>
 
                     </div>
 
 
-                    <label for="duration">
+                    <!-- DURATION -->
 
+                    <label>
                         Duration
-
                         <span class="optional">
                             Optional
                         </span>
-
                     </label>
 
 
-                    <input
-                        type="number"
-                        id="duration"
-                        placeholder="Minutes"
-                        min="1"
-                        inputmode="numeric"
-                    >
+                    <div class="duration-picker">
 
+                        <div class="duration-column">
+
+                            <select id="duration-hours">
+
+                                <option value="0">
+                                    0 hr
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="duration-column">
+
+                            <select id="duration-minutes">
+
+                                <option value="0">
+                                    0 min
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <p class="helper-text">
+                        Scroll the wheels to choose your duration.
+                    </p>
+
+
+                    <!-- CAPTION -->
 
                     <label for="caption">
-
                         Caption
-
                         <span class="optional">
                             Optional
                         </span>
-
                     </label>
-
 
                     <textarea
                         id="caption"
                         placeholder="How did it go?"
                         rows="4"
+                        maxlength="500"
                     ></textarea>
 
+
+                    <!-- PHOTOS -->
+
+                    <label>
+                        Activity photos
+                        <span class="optional">
+                            Optional
+                        </span>
+                    </label>
+
+
+                    <label
+                        for="activity-photos"
+                        class="photo-upload-box"
+                    >
+
+                        <span class="photo-upload-icon">
+                            +
+                        </span>
+
+                        <span>
+                            Add activity photos
+                        </span>
+
+                        <small>
+                            Select up to 5 photos
+                        </small>
+
+                    </label>
+
+
+                    <input
+                        type="file"
+                        id="activity-photos"
+                        accept="image/*"
+                        multiple
+                        class="file-input"
+                    >
+
+
+                    <div
+                        id="activity-photo-preview"
+                        class="photo-preview-grid"
+                    ></div>
+
+
+                    <!-- SUBMIT -->
 
                     <button
                         type="submit"
                         class="primary-button"
+                        id="post-activity-button"
                     >
                         Post activity
                     </button>
@@ -600,23 +674,66 @@
             </div>
 
 
-            <!-- =========================
-                 PROFILE PAGE
-            ========================== -->
+            <!-- =================================================
+                 PROFILE
+            ================================================== -->
 
             <div
                 id="profile-page"
                 class="page hidden"
             >
 
+                <div class="page-heading">
+
+                    <p class="eyebrow">
+                        YOUR HUNDO
+                    </p>
+
+                    <h2>
+                        Profile
+                    </h2>
+
+                </div>
+
+
+                <!-- PROFILE HEADER -->
+
                 <div class="profile-header">
 
-                    <div class="profile-picture">
-                        👤
-                    </div>
+                    <label
+                        for="profile-photo-input"
+                        class="profile-picture profile-picture-clickable"
+                        id="profile-picture-container"
+                    >
+
+                        <img
+                            id="profile-picture-image"
+                            class="profile-picture-image hidden"
+                            alt="Profile"
+                        >
+
+                        <span
+                            id="profile-picture-placeholder"
+                        >
+                            👤
+                        </span>
+
+                        <span class="profile-photo-edit">
+                            +
+                        </span>
+
+                    </label>
 
 
-                    <div>
+                    <input
+                        type="file"
+                        id="profile-photo-input"
+                        accept="image/*"
+                        class="file-input"
+                    >
+
+
+                    <div class="profile-heading-info">
 
                         <h2 id="profile-name">
                             Your Name
@@ -630,6 +747,54 @@
 
                 </div>
 
+
+                <!-- PROFILE EDIT -->
+
+                <section class="profile-edit-card">
+
+                    <h3>
+                        Edit profile
+                    </h3>
+
+
+                    <label for="profile-name-input">
+                        Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profile-name-input"
+                        placeholder="Your name"
+                        maxlength="80"
+                    >
+
+
+                    <label for="profile-age-input">
+                        Age
+                    </label>
+
+                    <input
+                        type="number"
+                        id="profile-age-input"
+                        min="1"
+                        max="120"
+                        inputmode="numeric"
+                        placeholder="Your age"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="save-profile-button"
+                        class="primary-button"
+                    >
+                        Save profile
+                    </button>
+
+                </section>
+
+
+                <!-- PROFILE STATS -->
 
                 <div class="profile-stats">
 
@@ -661,12 +826,13 @@
                 </div>
 
 
+                <!-- HISTORY -->
+
                 <section class="history-section">
 
                     <h3>
                         Activity history
                     </h3>
-
 
                     <div id="activity-history">
 
@@ -679,26 +845,73 @@
                 </section>
 
 
+                <!-- WEIGHT -->
+
                 <section class="weight-section">
 
                     <h3>
                         Weight tracker
                     </h3>
 
-                    <p>
-                        Your weight data is private.
+                    <p class="private-note">
+                        🔒 Your weight is private and only visible to you.
                     </p>
 
+
+                    <form id="weight-form">
+
+                        <div class="weight-input-row">
+
+                            <input
+                                type="number"
+                                id="weight-input"
+                                placeholder="Weight"
+                                min="1"
+                                max="500"
+                                step="0.1"
+                                inputmode="decimal"
+                                required
+                            >
+
+                            <span>
+                                kg
+                            </span>
+
+                            <button
+                                type="submit"
+                                class="secondary-button weight-save-button"
+                            >
+                                Add
+                            </button>
+
+                        </div>
+
+                    </form>
+
+
+                    <div id="weight-history"></div>
+
                 </section>
+
+
+                <!-- LOGOUT -->
+
+                <button
+                    id="logout-button"
+                    type="button"
+                    class="logout-button"
+                >
+                    Log out
+                </button>
 
             </div>
 
         </section>
 
 
-        <!-- =========================
-             BOTTOM NAVIGATION
-        ========================== -->
+        <!-- =================================================
+             BOTTOM NAV
+        ================================================== -->
 
         <nav class="bottom-nav">
 
@@ -707,15 +920,8 @@
                 data-page="home-page"
                 type="button"
             >
-
-                <span>
-                    🏠
-                </span>
-
-                <small>
-                    Home
-                </small>
-
+                <span>🏠</span>
+                <small>Home</small>
             </button>
 
 
@@ -724,15 +930,8 @@
                 data-page="leaderboard-page"
                 type="button"
             >
-
-                <span>
-                    🏆
-                </span>
-
-                <small>
-                    Leaderboard
-                </small>
-
+                <span>🏆</span>
+                <small>Leaderboard</small>
             </button>
 
 
@@ -741,15 +940,8 @@
                 data-page="log-page"
                 type="button"
             >
-
-                <span>
-                    ＋
-                </span>
-
-                <small>
-                    Log
-                </small>
-
+                <span>＋</span>
+                <small>Log</small>
             </button>
 
 
@@ -758,20 +950,22 @@
                 data-page="profile-page"
                 type="button"
             >
-
-                <span>
-                    👤
-                </span>
-
-                <small>
-                    Profile
-                </small>
-
+                <span>👤</span>
+                <small>Profile</small>
             </button>
 
         </nav>
 
     </main>
+
+
+    <!-- TOAST -->
+
+    <div
+        id="toast"
+        class="toast"
+        role="status"
+    ></div>
 
 
     <!-- SUPABASE -->
