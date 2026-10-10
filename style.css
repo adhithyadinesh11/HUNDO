@@ -1801,3 +1801,76 @@ body {
         font-size: 8px;
     }
 }
+
+/* =====================================================
+   PROFILE AVATAR
+===================================================== */
+
+.profile-avatar-wrap {
+    position: relative;
+
+    width: 150px;
+    height: 150px;
+
+    flex: 0 0 150px;
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+
+    border-radius: 50%;
+    overflow: hidden;
+
+    background: var(--card);
+    border: 2px solid var(--border);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 45px;
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+/* PLUS BUTTON SITS OUTSIDE THE PHOTO */
+
+.profile-photo-button {
+    position: absolute;
+
+    right: -7px;
+    bottom: -7px;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 50%;
+
+    border: 4px solid var(--black);
+
+    background: var(--white);
+    color: var(--black);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 27px;
+    font-weight: 500;
+
+    line-height: 1;
+
+    z-index: 5;
+}
+
+.profile-photo-button:active {
+    transform: scale(0.94);
+}
