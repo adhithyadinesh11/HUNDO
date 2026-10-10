@@ -13,6 +13,7 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_zq-tc602UONo5fg90pfebg_57-WM8cC";
 
+
 let supabaseClient = null;
 
 let currentUser = null;
@@ -31,12 +32,30 @@ let toastTimer = null;
    INIT
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
 
-    if (
-        window.supabase &&
-        typeof window.supabase.createClient === "function"
-    ) {
+        /*
+           Supabase must be ready before we decide
+           whether the user sees login or the app.
+        */
+
+        if (
+            !window.supabase ||
+            typeof window.supabase.createClient !== "function"
+        ) {
+
+            console.error(
+                "Supabase failed to load."
+            );
+
+            hideSplash();
+            showAuth();
+
+            return;
+        }
+
 
         supabaseClient =
             window.supabase.createClient(
@@ -54,37 +73,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             );
 
-    } else {
 
-        console.error("Supabase failed to load.");
+        setupUI();
 
-        hideSplash();
+        setupDurationPicker();
 
-        showAuth();
+        setupActivityPhotoInput();
 
-        return;
+        setupProfilePhotoInput();
+
+        setupAuthListener();
+
+
+        /*
+           Let the HUNDO splash animation play,
+           then check the existing session.
+        */
+
+        setTimeout(
+            checkSession,
+            1300
+        );
+
     }
-
-
-    setupUI();
-
-    setupDurationPicker();
-
-    setupPhotoInputs();
-
-    setupAuthListener();
-
-
-    /*
-       Give the HUNDO logo time to reveal.
-    */
-
-    setTimeout(
-        checkSession,
-        1300
-    );
-
-});
+);
 
 
 /* =========================================================
@@ -94,32 +106,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 function setupUI() {
 
     const showSignup =
-        document.getElementById("show-signup");
+        document.getElementById(
+            "show-signup"
+        );
 
     const backLogin =
-        document.getElementById("back-to-login");
+        document.getElementById(
+            "back-to-login"
+        );
 
     const loginForm =
-        document.getElementById("login-form");
+        document.getElementById(
+            "login-form"
+        );
 
     const signupForm =
-        document.getElementById("signup-form");
+        document.getElementById(
+            "signup-form"
+        );
 
     const homeLogButton =
-        document.getElementById("home-log-button");
+        document.getElementById(
+            "home-log-button"
+        );
 
     const activityForm =
-        document.getElementById("activity-form");
+        document.getElementById(
+            "activity-form"
+        );
 
     const saveProfileButton =
-        document.getElementById("save-profile-button");
+        document.getElementById(
+            "save-profile-button"
+        );
 
-    const weightForm =
-        document.getElementById("weight-form");
 
-    const logoutButton =
-        document.getElementById("logout-button");
-
+    /* ---------------------------------------------
+       SIGNUP SCREEN
+    --------------------------------------------- */
 
     if (showSignup) {
 
@@ -129,17 +153,21 @@ function setupUI() {
 
                 document
                     .getElementById("auth-screen")
-                    .classList.add("hidden");
+                    ?.classList.add("hidden");
 
                 document
                     .getElementById("signup-screen")
-                    .classList.remove("hidden");
+                    ?.classList.remove("hidden");
 
             }
         );
 
     }
 
+
+    /* ---------------------------------------------
+       BACK TO LOGIN
+    --------------------------------------------- */
 
     if (backLogin) {
 
@@ -149,17 +177,21 @@ function setupUI() {
 
                 document
                     .getElementById("signup-screen")
-                    .classList.add("hidden");
+                    ?.classList.add("hidden");
 
                 document
                     .getElementById("auth-screen")
-                    .classList.remove("hidden");
+                    ?.classList.remove("hidden");
 
             }
         );
 
     }
 
+
+    /* ---------------------------------------------
+       LOGIN
+    --------------------------------------------- */
 
     if (loginForm) {
 
@@ -171,6 +203,10 @@ function setupUI() {
     }
 
 
+    /* ---------------------------------------------
+       SIGNUP
+    --------------------------------------------- */
+
     if (signupForm) {
 
         signupForm.addEventListener(
@@ -181,15 +217,29 @@ function setupUI() {
     }
 
 
+    /* ---------------------------------------------
+       HOME LOG BUTTON
+    --------------------------------------------- */
+
     if (homeLogButton) {
 
         homeLogButton.addEventListener(
             "click",
-            () => showPage("log-page")
+            () => {
+
+                showPage(
+                    "log-page"
+                );
+
+            }
         );
 
     }
 
+
+    /* ---------------------------------------------
+       ACTIVITY FORM
+    --------------------------------------------- */
 
     if (activityForm) {
 
@@ -201,6 +251,10 @@ function setupUI() {
     }
 
 
+    /* ---------------------------------------------
+       SAVE PROFILE
+    --------------------------------------------- */
+
     if (saveProfileButton) {
 
         saveProfileButton.addEventListener(
@@ -211,29 +265,9 @@ function setupUI() {
     }
 
 
-    if (weightForm) {
-
-        weightForm.addEventListener(
-            "submit",
-            addWeight
-        );
-
-    }
-
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            logout
-        );
-
-    }
-
-
-    /*
-       Bottom navigation
-    */
+    /* ---------------------------------------------
+       BOTTOM NAVIGATION
+    --------------------------------------------- */
 
     document
         .querySelectorAll(".nav-item")
@@ -247,7 +281,11 @@ function setupUI() {
                         const page =
                             item.dataset.page;
 
-                        showPage(page);
+                        if (page) {
+
+                            showPage(page);
+
+                        }
 
                     }
                 );
@@ -256,12 +294,14 @@ function setupUI() {
         );
 
 
-    /*
-       Activity types
-    */
+    /* ---------------------------------------------
+       ACTIVITY TYPES
+    --------------------------------------------- */
 
     document
-        .querySelectorAll(".activity-type")
+        .querySelectorAll(
+            ".activity-type-button"
+        )
         .forEach(
             button => {
 
@@ -270,20 +310,28 @@ function setupUI() {
                     () => {
 
                         document
-                            .querySelectorAll(".activity-type")
+                            .querySelectorAll(
+                                ".activity-type-button"
+                            )
                             .forEach(
-                                item =>
+                                item => {
+
                                     item.classList.remove(
                                         "active"
-                                    )
+                                    );
+
+                                }
                             );
+
 
                         button.classList.add(
                             "active"
                         );
 
+
                         selectedActivityType =
-                            button.dataset.type;
+                            button.dataset.activityType ||
+                            "run";
 
                     }
                 );
@@ -292,12 +340,14 @@ function setupUI() {
         );
 
 
-    /*
-       Leaderboard tabs
-    */
+    /* ---------------------------------------------
+       LEADERBOARD TABS
+    --------------------------------------------- */
 
     document
-        .querySelectorAll(".leaderboard-tab")
+        .querySelectorAll(
+            ".leaderboard-tab"
+        )
         .forEach(
             tab => {
 
@@ -310,18 +360,25 @@ function setupUI() {
                                 ".leaderboard-tab"
                             )
                             .forEach(
-                                item =>
+                                item => {
+
                                     item.classList.remove(
                                         "active"
-                                    )
+                                    );
+
+                                }
                             );
+
 
                         tab.classList.add(
                             "active"
                         );
 
+
                         selectedBoard =
-                            tab.dataset.board;
+                            tab.dataset.board ||
+                            "runwalk";
+
 
                         loadLeaderboard();
 
@@ -340,8 +397,16 @@ function setupUI() {
 
 function setupAuthListener() {
 
+    if (!supabaseClient) {
+        return;
+    }
+
+
     supabaseClient.auth.onAuthStateChange(
-        async (event, session) => {
+        async (
+            event,
+            session
+        ) => {
 
             if (
                 event === "SIGNED_OUT"
@@ -359,10 +424,7 @@ function setupAuthListener() {
 
             if (
                 session &&
-                (
-                    event === "SIGNED_IN" ||
-                    event === "INITIAL_SESSION"
-                )
+                session.user
             ) {
 
                 currentUser =
@@ -376,28 +438,51 @@ function setupAuthListener() {
 }
 
 
-async function handleLogin(event) {
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function handleLogin(
+    event
+) {
 
     event.preventDefault();
 
+
+    const form =
+        event.currentTarget;
+
+
     const button =
-        event.target.querySelector(
+        form.querySelector(
             "button[type='submit']"
         );
 
-    button.disabled = true;
-    button.textContent = "Logging in…";
+
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "Logging in…";
+
+    }
 
 
     const email =
         document
-            .getElementById("login-email")
+            .getElementById(
+                "login-email"
+            )
             .value
             .trim();
 
+
     const password =
         document
-            .getElementById("login-password")
+            .getElementById(
+                "login-password"
+            )
             .value;
 
 
@@ -413,15 +498,25 @@ async function handleLogin(event) {
         );
 
 
-    button.disabled = false;
-    button.textContent = "Log in";
-
-
     if (error) {
+
+        console.error(
+            error
+        );
 
         showToast(
             error.message
         );
+
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Log in";
+
+        }
 
         return;
     }
@@ -431,52 +526,91 @@ async function handleLogin(event) {
         data.user;
 
 
+    if (button) {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Log in";
+
+    }
+
+
     await openApp();
 
 }
 
 
-async function handleSignup(event) {
+/* =========================================================
+   SIGNUP
+========================================================= */
+
+async function handleSignup(
+    event
+) {
 
     event.preventDefault();
 
 
+    const form =
+        event.currentTarget;
+
+
     const button =
-        event.target.querySelector(
+        form.querySelector(
             "button[type='submit']"
         );
 
-    button.disabled = true;
-    button.textContent = "Creating…";
+
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "Creating…";
+
+    }
 
 
     const name =
         document
-            .getElementById("signup-name")
+            .getElementById(
+                "signup-name"
+            )
             .value
             .trim();
+
 
     const age =
         Number(
             document
-                .getElementById("signup-age")
+                .getElementById(
+                    "signup-age"
+                )
                 .value
         );
 
+
     const email =
         document
-            .getElementById("signup-email")
+            .getElementById(
+                "signup-email"
+            )
             .value
             .trim();
 
+
     const password =
         document
-            .getElementById("signup-password")
+            .getElementById(
+                "signup-password"
+            )
             .value;
 
 
     if (
         !name ||
+        !Number.isFinite(age) ||
         age < 1 ||
         age > 120 ||
         password.length < 8
@@ -486,8 +620,15 @@ async function handleSignup(event) {
             "Please check your name, age and password."
         );
 
-        button.disabled = false;
-        button.textContent = "Join HUNDO";
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Join HUNDO";
+
+        }
 
         return;
     }
@@ -507,25 +648,46 @@ async function handleSignup(event) {
 
     if (error) {
 
+        console.error(
+            error
+        );
+
         showToast(
             error.message
         );
 
-        button.disabled = false;
-        button.textContent = "Join HUNDO";
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Join HUNDO";
+
+        }
 
         return;
     }
 
 
-    if (!data.user) {
+    if (
+        !data ||
+        !data.user
+    ) {
 
         showToast(
             "Account could not be created."
         );
 
-        button.disabled = false;
-        button.textContent = "Join HUNDO";
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Join HUNDO";
+
+        }
 
         return;
     }
@@ -536,8 +698,8 @@ async function handleSignup(event) {
 
 
     /*
-       The trigger creates the profile row.
-       We now fill in the name and age.
+       The database trigger creates
+       the profiles row automatically.
     */
 
     const {
@@ -567,15 +729,28 @@ async function handleSignup(event) {
             "Account created, but profile details could not be saved."
         );
 
-        button.disabled = false;
-        button.textContent = "Join HUNDO";
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Join HUNDO";
+
+        }
 
         return;
     }
 
 
-    button.disabled = false;
-    button.textContent = "Join HUNDO";
+    if (button) {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Join HUNDO";
+
+    }
 
 
     await openApp();
@@ -589,61 +764,99 @@ async function handleSignup(event) {
 
 async function checkSession() {
 
-    hideSplash();
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient.auth.getSession();
 
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient.auth.getSession();
+        if (error) {
+
+            console.error(
+                error
+            );
+
+            hideSplash();
+
+            showAuth();
+
+            return;
+        }
 
 
-    if (error) {
+        if (
+            data &&
+            data.session &&
+            data.session.user
+        ) {
+
+            currentUser =
+                data.session.user;
+
+
+            await openApp();
+
+
+            hideSplash();
+
+        } else {
+
+            showAuth();
+
+            hideSplash();
+
+        }
+
+    } catch (error) {
 
         console.error(
+            "Session check failed:",
             error
         );
 
         showAuth();
 
-        return;
-    }
-
-
-    if (
-        data &&
-        data.session &&
-        data.session.user
-    ) {
-
-        currentUser =
-            data.session.user;
-
-        await openApp();
-
-    } else {
-
-        showAuth();
+        hideSplash();
 
     }
 
 }
 
 
+/* =========================================================
+   AUTH / APP VISIBILITY
+========================================================= */
+
 function showAuth() {
 
     document
-        .getElementById("auth-screen")
-        .classList.remove("hidden");
+        .getElementById(
+            "auth-screen"
+        )
+        ?.classList.remove(
+            "hidden"
+        );
+
 
     document
-        .getElementById("signup-screen")
-        .classList.add("hidden");
+        .getElementById(
+            "signup-screen"
+        )
+        ?.classList.add(
+            "hidden"
+        );
+
 
     document
-        .getElementById("app-screen")
-        .classList.add("hidden");
+        .getElementById(
+            "app-screen"
+        )
+        ?.classList.add(
+            "hidden"
+        );
 
 }
 
@@ -652,13 +865,14 @@ function hideSplash() {
 
     const splash =
         document.getElementById(
-            "splash-screen"
+            "hundo-splash"
         );
+
 
     if (splash) {
 
         splash.classList.add(
-            "hidden"
+            "splash-hidden"
         );
 
     }
@@ -679,8 +893,9 @@ async function openApp() {
         } =
             await supabaseClient.auth.getUser();
 
+
         currentUser =
-            data.user;
+            data?.user || null;
 
     }
 
@@ -689,21 +904,38 @@ async function openApp() {
 
         showAuth();
 
+        hideSplash();
+
         return;
+
     }
 
 
     document
-        .getElementById("auth-screen")
-        .classList.add("hidden");
+        .getElementById(
+            "auth-screen"
+        )
+        ?.classList.add(
+            "hidden"
+        );
+
 
     document
-        .getElementById("signup-screen")
-        .classList.add("hidden");
+        .getElementById(
+            "signup-screen"
+        )
+        ?.classList.add(
+            "hidden"
+        );
+
 
     document
-        .getElementById("app-screen")
-        .classList.remove("hidden");
+        .getElementById(
+            "app-screen"
+        )
+        ?.classList.remove(
+            "hidden"
+        );
 
 
     await loadEverything();
@@ -726,6 +958,8 @@ async function loadEverything() {
         await ensureParticipant();
 
         updateDayCounter();
+
+        await loadStreak();
 
         await loadHome();
 
@@ -762,7 +996,10 @@ async function loadChallenge() {
         await supabaseClient
             .from("challenges")
             .select("*")
-            .eq("name", "HUNDO")
+            .eq(
+                "name",
+                "HUNDO"
+            )
             .order(
                 "start_date",
                 {
@@ -779,7 +1016,10 @@ async function loadChallenge() {
     }
 
 
-    if (!data || !data.length) {
+    if (
+        !data ||
+        !data.length
+    ) {
 
         throw new Error(
             "HUNDO challenge not found."
@@ -806,14 +1046,18 @@ async function ensureParticipant() {
     ) {
 
         return;
+
     }
 
 
     const {
-        data: existing
+        data: existing,
+        error: existingError
     } =
         await supabaseClient
-            .from("challenge_participants")
+            .from(
+                "challenge_participants"
+            )
             .select("id")
             .eq(
                 "challenge_id",
@@ -824,6 +1068,17 @@ async function ensureParticipant() {
                 currentUser.id
             )
             .limit(1);
+
+
+    if (existingError) {
+
+        console.error(
+            existingError
+        );
+
+        return;
+
+    }
 
 
     if (
@@ -840,7 +1095,9 @@ async function ensureParticipant() {
         error
     } =
         await supabaseClient
-            .from("challenge_participants")
+            .from(
+                "challenge_participants"
+            )
             .insert(
                 {
                     challenge_id:
@@ -851,10 +1108,6 @@ async function ensureParticipant() {
                 }
             );
 
-
-    /*
-       Duplicate race condition is harmless.
-    */
 
     if (
         error &&
@@ -911,11 +1164,16 @@ async function loadProfile() {
 }
 
 
+/* =========================================================
+   PROFILE UI
+========================================================= */
+
 function updateProfileUI() {
 
     const name =
         currentProfile?.name ||
         "Your Name";
+
 
     const age =
         currentProfile?.age;
@@ -926,15 +1184,18 @@ function updateProfileUI() {
             "profile-name"
         );
 
+
     const profileAge =
         document.getElementById(
             "profile-age"
         );
 
+
     const nameInput =
         document.getElementById(
             "profile-name-input"
         );
+
 
     const ageInput =
         document.getElementById(
@@ -981,46 +1242,207 @@ function updateProfileUI() {
 }
 
 
+/* =========================================================
+   PROFILE PHOTO
+========================================================= */
+
 function updateProfilePhoto() {
 
-    const image =
+    const container =
         document.getElementById(
-            "profile-picture-image"
+            "profile-picture"
         );
 
-    const placeholder =
+
+    if (!container) {
+        return;
+    }
+
+
+    /*
+       Always clear the container first.
+       This prevents an old giant <img> from
+       remaining inside the profile area.
+    */
+
+    container.innerHTML = "";
+
+
+    const photoURL =
+        currentProfile?.profile_photo_url;
+
+
+    if (photoURL) {
+
+        const image =
+            document.createElement(
+                "img"
+            );
+
+
+        image.src =
+            addCacheBuster(
+                photoURL
+            );
+
+
+        image.alt =
+            "Profile picture";
+
+
+        image.loading =
+            "eager";
+
+
+        image.onerror =
+            () => {
+
+                container.innerHTML =
+                    "👤";
+
+            };
+
+
+        container.appendChild(
+            image
+        );
+
+
+    } else {
+
+        container.textContent =
+            "👤";
+
+    }
+
+}
+
+
+/* =========================================================
+   PROFILE PHOTO INPUT
+========================================================= */
+
+function setupProfilePhotoInput() {
+
+    const button =
         document.getElementById(
-            "profile-picture-placeholder"
+            "profile-photo-button"
+        );
+
+
+    const input =
+        document.getElementById(
+            "profile-photo-input"
         );
 
 
     if (
-        currentProfile &&
-        currentProfile.profile_photo_url
+        button &&
+        input
     ) {
 
-        image.src =
-            currentProfile.profile_photo_url;
+        button.addEventListener(
+            "click",
+            () => {
 
-        image.classList.remove(
-            "hidden"
+                /*
+                   Clearing the value means the user can
+                   select the same file again if needed.
+                */
+
+                input.value = "";
+
+                input.click();
+
+            }
         );
 
-        placeholder.classList.add(
-            "hidden"
-        );
 
-    } else {
-
-        image.classList.add(
-            "hidden"
-        );
-
-        placeholder.classList.remove(
-            "hidden"
+        input.addEventListener(
+            "change",
+            handleProfilePhotoPreview
         );
 
     }
+
+}
+
+
+/* =========================================================
+   PROFILE PHOTO PREVIEW
+========================================================= */
+
+function handleProfilePhotoPreview(
+    event
+) {
+
+    const input =
+        event.target;
+
+
+    const file =
+        input.files &&
+        input.files[0];
+
+
+    if (!file) {
+        return;
+    }
+
+
+    if (
+        !file.type.startsWith(
+            "image/"
+        )
+    ) {
+
+        showToast(
+            "Please choose an image."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    const previewURL =
+        URL.createObjectURL(
+            file
+        );
+
+
+    const container =
+        document.getElementById(
+            "profile-picture"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    const image =
+        document.createElement(
+            "img"
+        );
+
+
+    image.src =
+        previewURL;
+
+
+    image.alt =
+        "New profile picture";
+
+
+    container.appendChild(
+        image
+    );
 
 }
 
@@ -1031,21 +1453,47 @@ function updateProfilePhoto() {
 
 async function saveProfile() {
 
+    if (
+        !currentUser
+    ) {
+
+        return;
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "save-profile-button"
+        );
+
+
+    const nameInput =
+        document.getElementById(
+            "profile-name-input"
+        );
+
+
+    const ageInput =
+        document.getElementById(
+            "profile-age-input"
+        );
+
+
+    const photoInput =
+        document.getElementById(
+            "profile-photo-input"
+        );
+
+
     const name =
-        document
-            .getElementById(
-                "profile-name-input"
-            )
-            .value
-            .trim();
+        nameInput?.value.trim() ||
+        "";
+
 
     const age =
         Number(
-            document
-                .getElementById(
-                    "profile-age-input"
-                )
-                .value
+            ageInput?.value
         );
 
 
@@ -1056,11 +1504,12 @@ async function saveProfile() {
         );
 
         return;
+
     }
 
 
     if (
-        !age ||
+        !Number.isFinite(age) ||
         age < 1 ||
         age > 120
     ) {
@@ -1070,155 +1519,182 @@ async function saveProfile() {
         );
 
         return;
+
     }
 
 
-    const button =
-        document.getElementById(
-            "save-profile-button"
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "Saving…";
+
+    }
+
+
+    try {
+
+        let profilePhotoURL =
+            currentProfile?.profile_photo_url ||
+            null;
+
+
+        /*
+           Upload a new profile picture only if
+           the user actually selected one.
+        */
+
+        const selectedFile =
+            photoInput?.files?.[0];
+
+
+        if (selectedFile) {
+
+            profilePhotoURL =
+                await uploadProfilePhoto(
+                    selectedFile
+                );
+
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("profiles")
+                .update(
+                    {
+                        name,
+                        age,
+                        profile_photo_url:
+                            profilePhotoURL
+                    }
+                )
+                .eq(
+                    "id",
+                    currentUser.id
+                )
+                .select()
+                .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        currentProfile =
+            data;
+
+
+        updateProfileUI();
+
+
+        /*
+           Clear the file input.
+           This also means another image can be
+           selected immediately afterwards.
+        */
+
+        if (photoInput) {
+
+            photoInput.value = "";
+
+        }
+
+
+        showToast(
+            "Profile updated."
         );
 
-    button.disabled = true;
-    button.textContent = "Saving…";
+
+        closeProfileEditor();
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("profiles")
-            .update(
-                {
-                    name,
-                    age
-                }
-            )
-            .eq(
-                "id",
-                currentUser.id
-            );
+        await loadLeaderboard();
 
 
-    button.disabled = false;
-    button.textContent = "Save profile";
-
-
-    if (error) {
+    } catch (error) {
 
         console.error(
+            "Profile save error:",
             error
         );
 
         showToast(
-            error.message
+            error.message ||
+            "Could not save profile."
         );
 
-        return;
+    } finally {
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Save profile";
+
+        }
+
     }
-
-
-    currentProfile.name =
-        name;
-
-    currentProfile.age =
-        age;
-
-
-    updateProfileUI();
-
-    await loadHome();
-
-    await loadLeaderboard();
-
-    showToast(
-        "Profile saved ✓"
-    );
 
 }
 
 
 /* =========================================================
-   PROFILE PHOTO
+   UPLOAD PROFILE PHOTO
 ========================================================= */
 
-function setupPhotoInputs() {
+async function uploadProfilePhoto(
+    file
+) {
 
-    const profileInput =
-        document.getElementById(
-            "profile-photo-input"
-        );
+    if (!currentUser) {
 
-    const activityInput =
-        document.getElementById(
-            "activity-photos"
-        );
-
-
-    if (profileInput) {
-
-        profileInput.addEventListener(
-            "change",
-            handleProfilePhoto
+        throw new Error(
+            "You must be logged in."
         );
 
     }
 
 
-    if (activityInput) {
+    if (
+        !file.type.startsWith(
+            "image/"
+        )
+    ) {
 
-        activityInput.addEventListener(
-            "change",
-            handleActivityPhotoSelection
+        throw new Error(
+            "Please select an image."
         );
 
     }
 
-}
 
+    /*
+       Unique path every time.
 
-async function handleProfilePhoto(event) {
-
-    const file =
-        event.target.files?.[0];
-
-
-    if (!file) {
-
-        return;
-    }
-
-
-    if (!file.type.startsWith("image/")) {
-
-        showToast(
-            "Please choose an image."
-        );
-
-        return;
-    }
-
-
-    if (file.size > 15 * 1024 * 1024) {
-
-        showToast(
-            "Profile photo must be under 15 MB."
-        );
-
-        return;
-    }
-
-
-    showToast(
-        "Uploading profile photo…"
-    );
-
+       This is important because replacing the same
+       storage filename can leave browser/CDN cache
+       showing the previous image.
+    */
 
     const extension =
-        getExtension(file.name);
+        getFileExtension(
+            file
+        );
 
 
-    const path =
-        `${currentUser.id}/${Date.now()}.${extension}`;
+    const filePath =
+        `${currentUser.id}/profile-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2)}.${extension}`;
 
 
     const {
@@ -1228,26 +1704,21 @@ async function handleProfilePhoto(event) {
             .storage
             .from("Profile pictures")
             .upload(
-                path,
+                filePath,
                 file,
                 {
                     cacheControl: "3600",
-                    upsert: false
+                    upsert: false,
+                    contentType:
+                        file.type
                 }
             );
 
 
     if (uploadError) {
 
-        console.error(
-            uploadError
-        );
+        throw uploadError;
 
-        showToast(
-            "Photo upload failed. Check Storage policies."
-        );
-
-        return;
     }
 
 
@@ -1257,172 +1728,62 @@ async function handleProfilePhoto(event) {
         supabaseClient
             .storage
             .from("Profile pictures")
-            .getPublicUrl(path);
-
-
-    const publicUrl =
-        data.publicUrl;
-
-
-    const {
-        error: profileError
-    } =
-        await supabaseClient
-            .from("profiles")
-            .update(
-                {
-                    profile_photo_url:
-                        publicUrl
-                }
-            )
-            .eq(
-                "id",
-                currentUser.id
+            .getPublicUrl(
+                filePath
             );
 
 
-    if (profileError) {
+    if (
+        !data ||
+        !data.publicUrl
+    ) {
 
-        console.error(
-            profileError
+        throw new Error(
+            "Could not create profile picture URL."
         );
 
-        showToast(
-            "Photo uploaded, but profile could not be updated."
-        );
-
-        return;
     }
 
 
-    currentProfile.profile_photo_url =
-        publicUrl;
-
-
-    updateProfileUI();
-
-    await loadHome();
-
-    await loadLeaderboard();
-
-    showToast(
-        "Profile photo updated ✓"
-    );
+    return data.publicUrl;
 
 }
 
 
 /* =========================================================
-   ACTIVITY PHOTO SELECTION
+   PROFILE EDITOR CLOSE
 ========================================================= */
 
-function handleActivityPhotoSelection(event) {
+function closeProfileEditor() {
 
-    const files =
-        Array.from(
-            event.target.files || []
+    const editor =
+        document.getElementById(
+            "profile-editor"
         );
 
 
-    if (files.length > 5) {
+    const editButton =
+        document.getElementById(
+            "edit-profile-button"
+        );
 
-        showToast(
-            "You can add up to 5 photos."
+
+    if (editor) {
+
+        editor.classList.add(
+            "hidden"
         );
 
     }
 
 
-    selectedActivityPhotos =
-        files
-            .filter(
-                file =>
-                    file.type.startsWith("image/")
-            )
-            .slice(0, 5);
+    if (editButton) {
 
-
-    renderActivityPhotoPreview();
-
-}
-
-
-function renderActivityPhotoPreview() {
-
-    const container =
-        document.getElementById(
-            "activity-photo-preview"
+        editButton.classList.remove(
+            "hidden"
         );
 
-
-    container.innerHTML = "";
-
-
-    selectedActivityPhotos.forEach(
-        (file, index) => {
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-            wrapper.className =
-                "photo-preview";
-
-
-            const image =
-                document.createElement(
-                    "img"
-                );
-
-            image.src =
-                URL.createObjectURL(
-                    file
-                );
-
-
-            const remove =
-                document.createElement(
-                    "button"
-                );
-
-            remove.type =
-                "button";
-
-            remove.className =
-                "photo-remove";
-
-            remove.textContent =
-                "×";
-
-
-            remove.addEventListener(
-                "click",
-                () => {
-
-                    selectedActivityPhotos
-                        .splice(index, 1);
-
-                    renderActivityPhotoPreview();
-
-                }
-            );
-
-
-            wrapper.appendChild(
-                image
-            );
-
-            wrapper.appendChild(
-                remove
-            );
-
-            container.appendChild(
-                wrapper
-            );
-
-        }
-    );
+    }
 
 }
 
@@ -1438,22 +1799,42 @@ function setupDurationPicker() {
             "duration-hours"
         );
 
+
     const minutes =
         document.getElementById(
             "duration-minutes"
         );
 
 
-    if (!hours || !minutes) {
+    const seconds =
+        document.getElementById(
+            "duration-seconds"
+        );
+
+
+    if (
+        !hours ||
+        !minutes ||
+        !seconds
+    ) {
 
         return;
+
     }
 
 
+    /*
+       HOURS
+       0–23
+    */
+
+    hours.innerHTML = "";
+
+
     for (
-        let hour = 1;
-        hour <= 23;
-        hour++
+        let i = 0;
+        i <= 23;
+        i++
     ) {
 
         const option =
@@ -1461,11 +1842,14 @@ function setupDurationPicker() {
                 "option"
             );
 
+
         option.value =
-            hour;
+            String(i);
+
 
         option.textContent =
-            `${hour} hr`;
+            `${String(i).padStart(2, "0")} hr`;
+
 
         hours.appendChild(
             option
@@ -1474,10 +1858,18 @@ function setupDurationPicker() {
     }
 
 
+    /*
+       MINUTES
+       0–59
+    */
+
+    minutes.innerHTML = "";
+
+
     for (
-        let minute = 5;
-        minute < 60;
-        minute += 5
+        let i = 0;
+        i <= 59;
+        i++
     ) {
 
         const option =
@@ -1485,11 +1877,14 @@ function setupDurationPicker() {
                 "option"
             );
 
+
         option.value =
-            minute;
+            String(i);
+
 
         option.textContent =
-            `${minute} min`;
+            `${String(i).padStart(2, "0")} min`;
+
 
         minutes.appendChild(
             option
@@ -1497,14 +1892,329 @@ function setupDurationPicker() {
 
     }
 
+
+    /*
+       SECONDS
+       0–59
+    */
+
+    seconds.innerHTML = "";
+
+
+    for (
+        let i = 0;
+        i <= 59;
+        i++
+    ) {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+
+        option.value =
+            String(i);
+
+
+        option.textContent =
+            `${String(i).padStart(2, "0")} sec`;
+
+
+        seconds.appendChild(
+            option
+        );
+
+    }
+
+
+    hours.value = "0";
+
+    minutes.value = "0";
+
+    seconds.value = "0";
+
 }
 
 
 /* =========================================================
-   ACTIVITY SUBMIT
+   GET DURATION
 ========================================================= */
 
-async function handleActivitySubmit(event) {
+function getSelectedDurationSeconds() {
+
+    const hours =
+        Number(
+            document.getElementById(
+                "duration-hours"
+            )?.value || 0
+        );
+
+
+    const minutes =
+        Number(
+            document.getElementById(
+                "duration-minutes"
+            )?.value || 0
+        );
+
+
+    const seconds =
+        Number(
+            document.getElementById(
+                "duration-seconds"
+            )?.value || 0
+        );
+
+
+    const total =
+        (
+            hours * 3600
+        ) +
+        (
+            minutes * 60
+        ) +
+        seconds;
+
+
+    return total > 0
+        ? total
+        : null;
+
+}
+
+
+/* =========================================================
+   ACTIVITY PHOTOS
+========================================================= */
+
+function setupActivityPhotoInput() {
+
+    const input =
+        document.getElementById(
+            "activity-photo-input"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    input.addEventListener(
+        "change",
+        event => {
+
+            const files =
+                Array.from(
+                    event.target.files || []
+                );
+
+
+            if (!files.length) {
+                return;
+            }
+
+
+            /*
+               Maximum 5 photos.
+            */
+
+            const availableSlots =
+                5 -
+                selectedActivityPhotos.length;
+
+
+            if (
+                availableSlots <= 0
+            ) {
+
+                showToast(
+                    "You can add up to 5 pictures."
+                );
+
+                input.value = "";
+
+                return;
+
+            }
+
+
+            const filesToAdd =
+                files
+                    .slice(
+                        0,
+                        availableSlots
+                    );
+
+
+            for (
+                const file of filesToAdd
+            ) {
+
+                if (
+                    !file.type.startsWith(
+                        "image/"
+                    )
+                ) {
+
+                    continue;
+
+                }
+
+
+                selectedActivityPhotos.push(
+                    file
+                );
+
+            }
+
+
+            input.value = "";
+
+            renderActivityPhotoPreview();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RENDER ACTIVITY PHOTO PREVIEW
+========================================================= */
+
+function renderActivityPhotoPreview() {
+
+    const container =
+        document.getElementById(
+            "activity-photo-preview"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    selectedActivityPhotos
+        .forEach(
+            (
+                file,
+                index
+            ) => {
+
+                const wrapper =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                wrapper.className =
+                    "activity-photo-preview-item";
+
+
+                const image =
+                    document.createElement(
+                        "img"
+                    );
+
+
+                const objectURL =
+                    URL.createObjectURL(
+                        file
+                    );
+
+
+                image.src =
+                    objectURL;
+
+
+                image.alt =
+                    `Activity picture ${index + 1}`;
+
+
+                image.onload =
+                    () => {
+
+                        URL.revokeObjectURL(
+                            objectURL
+                        );
+
+                    };
+
+
+                const removeButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                removeButton.type =
+                    "button";
+
+
+                removeButton.className =
+                    "activity-photo-remove";
+
+
+                removeButton.textContent =
+                    "×";
+
+
+                removeButton.setAttribute(
+                    "aria-label",
+                    "Remove picture"
+                );
+
+
+                removeButton.addEventListener(
+                    "click",
+                    () => {
+
+                        selectedActivityPhotos
+                            .splice(
+                                index,
+                                1
+                            );
+
+
+                        renderActivityPhotoPreview();
+
+                    }
+                );
+
+
+                wrapper.appendChild(
+                    image
+                );
+
+
+                wrapper.appendChild(
+                    removeButton
+                );
+
+
+                container.appendChild(
+                    wrapper
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   POST ACTIVITY
+========================================================= */
+
+async function handleActivitySubmit(
+    event
+) {
 
     event.preventDefault();
 
@@ -1515,73 +2225,10 @@ async function handleActivitySubmit(event) {
     ) {
 
         showToast(
-            "HUNDO is still loading. Try again."
+            "Please log in again."
         );
 
         return;
-    }
-
-
-    const distance =
-        Number(
-            document
-                .getElementById(
-                    "distance"
-                )
-                .value
-        );
-
-
-    const hours =
-        Number(
-            document
-                .getElementById(
-                    "duration-hours"
-                )
-                .value
-        );
-
-
-    const minutes =
-        Number(
-            document
-                .getElementById(
-                    "duration-minutes"
-                )
-                .value
-        );
-
-
-    const caption =
-        document
-            .getElementById(
-                "caption"
-            )
-            .value
-            .trim();
-
-
-    if (
-        !distance ||
-        distance <= 0
-    ) {
-
-        showToast(
-            "Enter a distance first."
-        );
-
-        return;
-    }
-
-
-    let durationMinutes =
-        (hours * 60) + minutes;
-
-
-    if (durationMinutes <= 0) {
-
-        durationMinutes =
-            null;
 
     }
 
@@ -1592,22 +2239,167 @@ async function handleActivitySubmit(event) {
         );
 
 
-    button.disabled = true;
-    button.textContent = "Posting…";
+    const distanceInput =
+        document.getElementById(
+            "activity-distance"
+        );
 
 
-    /*
-       First create the activity.
-    */
+    const captionInput =
+        document.getElementById(
+            "activity-caption"
+        );
 
-    const {
-        data: activity,
-        error: activityError
-    } =
-        await supabaseClient
-            .from("activities")
-            .insert(
-                {
+
+    const dateInput =
+        document.getElementById(
+            "activity-date"
+        );
+
+
+    const distance =
+        Number(
+            distanceInput?.value
+        );
+
+
+    const activityDate =
+        dateInput?.value ||
+        getTodayISO();
+
+
+    const caption =
+        captionInput?.value.trim() ||
+        null;
+
+
+    const durationSeconds =
+        getSelectedDurationSeconds();
+
+
+    if (
+        !Number.isFinite(distance) ||
+        distance <= 0
+    ) {
+
+        showToast(
+            "Please enter a valid distance."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !activityDate
+    ) {
+
+        showToast(
+            "Please choose a date."
+        );
+
+        return;
+
+    }
+
+
+    if (button) {
+
+        button.disabled = true;
+
+        button.textContent =
+            "Posting…";
+
+    }
+
+
+    try {
+
+        /*
+           Make sure the user is actually a
+           challenge participant.
+        */
+
+        await ensureParticipant();
+
+
+        /*
+           Save the activity first.
+        */
+
+        const activityPayload = {
+
+            user_id:
+                currentUser.id,
+
+            challenge_id:
+                currentChallenge.id,
+
+            activity_type:
+                selectedActivityType,
+
+            distance_km:
+                Number(
+                    distance.toFixed(2)
+                ),
+
+            duration_minutes:
+                durationSeconds
+                    ? Math.round(
+                        durationSeconds / 60
+                    )
+                    : null,
+
+            duration_seconds:
+                durationSeconds,
+
+            activity_date:
+                activityDate,
+
+            caption:
+                caption
+
+        };
+
+
+        let activityData = null;
+
+
+        /*
+           First try with duration_seconds.
+        */
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("activities")
+                .insert(
+                    activityPayload
+                )
+                .select()
+                .single();
+
+
+        if (error) {
+
+            /*
+               If an old schema is being used,
+               retry without duration_seconds.
+            */
+
+            if (
+                String(error.message)
+                    .toLowerCase()
+                    .includes(
+                        "duration_seconds"
+                    )
+            ) {
+
+                const fallbackPayload = {
+
                     user_id:
                         currentUser.id,
 
@@ -1618,188 +2410,149 @@ async function handleActivitySubmit(event) {
                         selectedActivityType,
 
                     distance_km:
-                        distance,
+                        Number(
+                            distance.toFixed(2)
+                        ),
 
                     duration_minutes:
-                        durationMinutes,
+                        durationSeconds
+                            ? Math.round(
+                                durationSeconds / 60
+                            )
+                            : null,
 
                     activity_date:
-                        getLocalDateString(),
+                        activityDate,
 
                     caption:
-                        caption || null
+                        caption
+
+                };
+
+
+                const fallbackResult =
+                    await supabaseClient
+                        .from("activities")
+                        .insert(
+                            fallbackPayload
+                        )
+                        .select()
+                        .single();
+
+
+                if (
+                    fallbackResult.error
+                ) {
+
+                    throw fallbackResult.error;
+
                 }
-            )
-            .select()
-            .single();
 
 
-    if (activityError) {
+                activityData =
+                    fallbackResult.data;
 
-        console.error(
-            activityError
-        );
+            } else {
 
-        button.disabled = false;
-        button.textContent =
-            "Post activity";
-
-        showToast(
-            activityError.message
-        );
-
-        return;
-    }
-
-
-    /*
-       Upload activity photos.
-    */
-
-    let photoUploadFailed =
-        false;
-
-
-    for (
-        const file of selectedActivityPhotos
-    ) {
-
-        try {
-
-            if (
-                file.size >
-                15 * 1024 * 1024
-            ) {
-
-                photoUploadFailed = true;
-
-                continue;
+                throw error;
 
             }
 
+        } else {
 
-            const extension =
-                getExtension(file.name);
-
-
-            const path =
-                `${currentUser.id}/activities/${activity.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
-
-
-            const {
-                error: uploadError
-            } =
-                await supabaseClient
-                    .storage
-                    .from("activity pictures")
-                    .upload(
-                        path,
-                        file,
-                        {
-                            cacheControl:
-                                "3600",
-                            upsert:
-                                false
-                        }
-                    );
-
-
-            if (uploadError) {
-
-                console.error(
-                    uploadError
-                );
-
-                photoUploadFailed = true;
-
-                continue;
-
-            }
-
-
-            const {
-                data
-            } =
-                supabaseClient
-                    .storage
-                    .from("activity pictures")
-                    .getPublicUrl(
-                        path
-                    );
-
-
-            const {
-                error: photoRowError
-            } =
-                await supabaseClient
-                    .from("activity_photos")
-                    .insert(
-                        {
-                            activity_id:
-                                activity.id,
-
-                            photo_url:
-                                data.publicUrl
-                        }
-                    );
-
-
-            if (photoRowError) {
-
-                console.error(
-                    photoRowError
-                );
-
-                photoUploadFailed = true;
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                error
-            );
-
-            photoUploadFailed = true;
+            activityData =
+                data;
 
         }
 
-    }
+
+        if (
+            !activityData ||
+            !activityData.id
+        ) {
+
+            throw new Error(
+                "Activity was not created."
+            );
+
+        }
 
 
-    /*
-       Reset form.
-    */
+        /*
+           Upload activity photos AFTER
+           the activity exists.
+        */
 
-    resetActivityForm();
+        if (
+            selectedActivityPhotos.length
+        ) {
 
+            await uploadActivityPhotos(
+                activityData.id,
+                selectedActivityPhotos
+            );
 
-    button.disabled = false;
-    button.textContent =
-        "Post activity";
-
-
-    await loadHome();
-
-    await loadLeaderboard();
-
-    await loadProfilePage();
+        }
 
 
-    showPage("home-page");
+        /*
+           Reset the form.
+        */
+
+        resetActivityForm();
 
 
-    if (photoUploadFailed) {
+        /*
+           Refresh all affected sections.
+        */
+
+        await loadHome();
+
+        await loadLeaderboard();
+
+        await loadProfilePage();
+
+        await loadStreak();
+
 
         showToast(
-            "Activity posted. Some photos could not be uploaded."
+            "Activity posted! 🔥"
         );
 
-    } else {
+
+        /*
+           Return to home after posting.
+        */
+
+        showPage(
+            "home-page"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Activity posting error:",
+            error
+        );
+
 
         showToast(
-            "Activity posted ✓"
+            error.message ||
+            "Could not post activity."
         );
+
+
+    } finally {
+
+        if (button) {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Post activity";
+
+        }
 
     }
 
@@ -1807,7 +2560,113 @@ async function handleActivitySubmit(event) {
 
 
 /* =========================================================
-   RESET ACTIVITY
+   UPLOAD ACTIVITY PHOTOS
+========================================================= */
+
+async function uploadActivityPhotos(
+    activityId,
+    files
+) {
+
+    for (
+        let i = 0;
+        i < files.length;
+        i++
+    ) {
+
+        const file =
+            files[i];
+
+
+        const extension =
+            getFileExtension(
+                file
+            );
+
+
+        const filePath =
+            `${currentUser.id}/${activityId}/photo-${Date.now()}-${i}-${Math.random()
+                .toString(36)
+                .slice(2)}.${extension}`;
+
+
+        const {
+            error: uploadError
+        } =
+            await supabaseClient
+                .storage
+                .from("activity pictures")
+                .upload(
+                    filePath,
+                    file,
+                    {
+                        cacheControl: "3600",
+                        upsert: false,
+                        contentType:
+                            file.type
+                    }
+                );
+
+
+        if (uploadError) {
+
+            throw uploadError;
+
+        }
+
+
+        const {
+            data
+        } =
+            supabaseClient
+                .storage
+                .from("activity pictures")
+                .getPublicUrl(
+                    filePath
+                );
+
+
+        if (
+            !data ||
+            !data.publicUrl
+        ) {
+
+            throw new Error(
+                "Could not create activity picture URL."
+            );
+
+        }
+
+
+        const {
+            error: photoError
+        } =
+            await supabaseClient
+                .from("activity_photos")
+                .insert(
+                    {
+                        activity_id:
+                            activityId,
+
+                        photo_url:
+                            data.publicUrl
+                    }
+                );
+
+
+        if (photoError) {
+
+            throw photoError;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   RESET ACTIVITY FORM
 ========================================================= */
 
 function resetActivityForm() {
@@ -1816,6 +2675,7 @@ function resetActivityForm() {
         document.getElementById(
             "activity-form"
         );
+
 
     if (form) {
 
@@ -1828,56 +2688,70 @@ function resetActivityForm() {
         [];
 
 
-    document
-        .getElementById(
-            "activity-photo-preview"
-        )
-        .innerHTML = "";
-
-
-    document
-        .querySelectorAll(
-            ".activity-type"
-        )
-        .forEach(
-            button =>
-                button.classList.remove(
-                    "active"
-                )
-        );
-
-
-    const run =
-        document.querySelector(
-            '[data-type="run"]'
-        );
-
-
-    if (run) {
-
-        run.classList.add(
-            "active"
-        );
-
-    }
-
-
     selectedActivityType =
         "run";
 
 
     document
-        .getElementById(
-            "duration-hours"
+        .querySelectorAll(
+            ".activity-type-button"
         )
-        .value = "0";
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.activityType ===
+                    "run"
+                );
+
+            }
+        );
 
 
-    document
-        .getElementById(
-            "duration-minutes"
-        )
-        .value = "0";
+    setupDurationPicker();
+
+
+    renderActivityPhotoPreview();
+
+
+    const dateInput =
+        document.getElementById(
+            "activity-date"
+        );
+
+
+    if (dateInput) {
+
+        dateInput.value =
+            getTodayISO();
+
+    }
+
+}
+
+
+/* =========================================================
+   SET DEFAULT ACTIVITY DATE
+========================================================= */
+
+function setupActivityDate() {
+
+    const dateInput =
+        document.getElementById(
+            "activity-date"
+        );
+
+
+    if (
+        dateInput &&
+        !dateInput.value
+    ) {
+
+        dateInput.value =
+            getTodayISO();
+
+    }
 
 }
 
@@ -1889,132 +2763,126 @@ function resetActivityForm() {
 async function loadHome() {
 
     if (
-        !currentUser ||
-        !currentChallenge
+        !currentChallenge ||
+        !currentUser
     ) {
 
         return;
+
     }
 
 
     const activities =
-        await fetchChallengeActivities();
+        await fetchUserChallengeActivities();
 
 
-    const myActivities =
-        activities.filter(
-            activity =>
-                activity.user_id ===
-                currentUser.id
-        );
+    let runWalkTotal = 0;
+
+    let cyclingTotal = 0;
 
 
-    const runWalk =
-        sumDistance(
-            myActivities.filter(
-                activity =>
-                    activity.activity_type === "run" ||
-                    activity.activity_type === "walk"
-            )
-        );
+    activities.forEach(
+        activity => {
+
+            const distance =
+                Number(
+                    activity.distance_km
+                ) || 0;
 
 
-    const cycling =
-        sumDistance(
-            myActivities.filter(
-                activity =>
-                    activity.activity_type === "cycle"
-            )
-        );
+            if (
+                activity.activity_type === "cycle"
+            ) {
+
+                cyclingTotal +=
+                    distance;
+
+            } else {
+
+                runWalkTotal +=
+                    distance;
+
+            }
+
+        }
+    );
 
 
-    document
-        .getElementById(
-            "run-walk-total"
-        )
-        .textContent =
-            `${runWalk.toFixed(1)} km`;
+    setText(
+        "run-walk-total",
+        `${runWalkTotal.toFixed(1)} km`
+    );
 
 
-    document
-        .getElementById(
-            "cycling-total"
-        )
-        .textContent =
-            `${cycling.toFixed(1)} km`;
+    setText(
+        "cycling-total",
+        `${cyclingTotal.toFixed(1)} km`
+    );
 
+
+    /*
+       Calculate current user's ranks.
+    */
 
     const rankings =
-        calculateRankings(
-            activities
-        );
+        await getLeaderboardData();
 
 
     const runWalkRank =
-        rankings.runwalk.find(
-            item =>
-                item.user_id ===
+        rankings.runwalk.findIndex(
+            athlete =>
+                athlete.user_id ===
                 currentUser.id
-        );
+        ) + 1;
 
 
     const cyclingRank =
-        rankings.cycle.find(
-            item =>
-                item.user_id ===
+        rankings.cycle.findIndex(
+            athlete =>
+                athlete.user_id ===
                 currentUser.id
-        );
+        ) + 1;
 
 
-    document
-        .getElementById(
-            "run-walk-rank"
-        )
-        .textContent =
-            `Rank #${runWalkRank?.rank || "—"}`;
-
-
-    document
-        .getElementById(
-            "cycling-rank"
-        )
-        .textContent =
-            `Rank #${cyclingRank?.rank || "—"}`;
-
-
-    const greeting =
-        document.getElementById(
-            "home-greeting"
-        );
-
-
-    if (greeting) {
-
-        greeting.textContent =
-            currentProfile?.name
-                ? `Let's get moving, ${firstName(currentProfile.name)}.`
-                : "Let's get moving.";
-
-    }
-
-
-    renderActivityFeed(
-        activities
+    setText(
+        "run-walk-rank",
+        runWalkRank > 0
+            ? `Rank #${runWalkRank}`
+            : "Rank #—"
     );
+
+
+    setText(
+        "cycling-rank",
+        cyclingRank > 0
+            ? `Rank #${cyclingRank}`
+            : "Rank #—"
+    );
+
+
+    /*
+       Feed.
+    */
+
+    await loadActivityFeed();
 
 }
 
 
 /* =========================================================
-   FETCH ACTIVITIES
+   ACTIVITY FEED
 ========================================================= */
 
-async function fetchChallengeActivities() {
+async function loadActivityFeed() {
 
-    if (!currentChallenge) {
+    const container =
+        document.getElementById(
+            "activity-feed"
+        );
 
-        return [];
 
+    if (!container) {
+        return;
     }
 
 
@@ -2026,16 +2894,7 @@ async function fetchChallengeActivities() {
             .from("activities")
             .select(
                 `
-                id,
-                user_id,
-                challenge_id,
-                activity_type,
-                distance_km,
-                duration_minutes,
-                activity_date,
-                caption,
-                created_at,
-                updated_at,
+                *,
                 profiles (
                     id,
                     name,
@@ -2058,47 +2917,48 @@ async function fetchChallengeActivities() {
                     ascending: false
                 }
             )
-            .limit(100);
+            .limit(30);
 
 
     if (error) {
 
         console.error(
-            "Activity fetch error:",
             error
         );
 
-        return [];
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>
+                    Could not load activities
+                </h3>
+            </div>
+        `;
+
+        return;
 
     }
 
 
-    return data || [];
-
-}
-
-
-/* =========================================================
-   FEED
-========================================================= */
-
-function renderActivityFeed(
-    activities
-) {
-
-    const container =
-        document.getElementById(
-            "activity-feed"
-        );
-
-
-    if (!activities.length) {
+    if (
+        !data ||
+        !data.length
+    ) {
 
         container.innerHTML = `
             <div class="empty-state">
-                <div class="empty-icon">🏃</div>
-                <h3>No activities yet</h3>
-                <p>Be the first person to log today's activity.</p>
+
+                <div class="empty-icon">
+                    🏃
+                </div>
+
+                <h3>
+                    No activities yet
+                </h3>
+
+                <p>
+                    Be the first person to log today's activity.
+                </p>
+
             </div>
         `;
 
@@ -2108,12 +2968,11 @@ function renderActivityFeed(
 
 
     container.innerHTML =
-        activities
+        data
             .map(
                 activity =>
-                    activityCardHTML(
-                        activity,
-                        true
+                    renderActivityCard(
+                        activity
                     )
             )
             .join("");
@@ -2122,59 +2981,59 @@ function renderActivityFeed(
 
 
 /* =========================================================
-   ACTIVITY CARD HTML
+   ACTIVITY CARD
 ========================================================= */
 
-function activityCardHTML(
-    activity,
-    showDelete
+function renderActivityCard(
+    activity
 ) {
 
+    const icon =
+        activity.activity_type === "cycle"
+            ? "🚴"
+            : activity.activity_type === "walk"
+                ? "🚶"
+                : "🏃";
+
+
+    const typeName =
+        activity.activity_type === "cycle"
+            ? "Cycling"
+            : activity.activity_type === "walk"
+                ? "Walk"
+                : "Run";
+
+
+    const duration =
+        formatDuration(
+            activity.duration_seconds,
+            activity.duration_minutes
+        );
+
+
     const profile =
-        activity.profiles || {};
+        activity.profiles ||
+        {};
+
 
     const name =
         profile.name ||
         "HUNDO athlete";
 
 
-    const icon =
-        activity.activity_type === "run"
-            ? "🏃"
-            : activity.activity_type === "walk"
-                ? "🚶"
-                : "🚴";
-
-
-    const typeName =
-        activity.activity_type === "run"
-            ? "Run"
-            : activity.activity_type === "walk"
-                ? "Walk"
-                : "Cycle";
-
-
     const avatar =
         profile.profile_photo_url
             ? `
                 <img
-                    src="${escapeAttribute(profile.profile_photo_url)}"
+                    src="${escapeAttribute(
+                        addCacheBuster(
+                            profile.profile_photo_url
+                        )
+                    )}"
                     alt=""
                 >
-              `
+            `
             : "👤";
-
-
-    const duration =
-        formatDuration(
-            activity.duration_minutes
-        );
-
-
-    const date =
-        formatDate(
-            activity.activity_date
-        );
 
 
     const photos =
@@ -2190,36 +3049,36 @@ function activityCardHTML(
             ? `
                 <div class="activity-photo-grid">
                     ${photos
-                        .slice(0, 5)
                         .map(
-                            photo =>
-                                `
+                            photo => `
                                 <img
-                                    src="${escapeAttribute(photo.photo_url)}"
-                                    alt="Activity photo"
-                                    loading="lazy"
+                                    src="${escapeAttribute(
+                                        photo.photo_url
+                                    )}"
+                                    alt="Activity picture"
                                 >
-                                `
+                            `
                         )
-                        .join("")
-                    }
+                        .join("")}
                 </div>
-              `
+            `
             : "";
 
 
     const deleteHTML =
-        showDelete &&
-        activity.user_id === currentUser.id
+        activity.user_id ===
+        currentUser?.id
             ? `
                 <button
-                    class="activity-delete"
                     type="button"
-                    data-delete-activity="${activity.id}"
+                    data-delete-activity="${escapeAttribute(
+                        activity.id
+                    )}"
+                    class="activity-delete-button"
                 >
-                    Delete activity
+                    Delete
                 </button>
-              `
+            `
             : "";
 
 
@@ -2228,19 +3087,19 @@ function activityCardHTML(
 
             <div class="activity-card-header">
 
-                <div class="feed-avatar">
+                <div class="activity-feed-avatar">
                     ${avatar}
                 </div>
 
-                <div class="activity-user">
+                <div class="activity-feed-user">
 
                     <strong>
                         ${escapeHTML(name)}
                     </strong>
 
-                    <span>
-                        ${date}
-                    </span>
+                    <small>
+                        ${typeName}
+                    </small>
 
                 </div>
 
@@ -2256,7 +3115,9 @@ function activityCardHTML(
                     </div>
 
                     <div class="activity-distance">
-                        ${Number(activity.distance_km).toFixed(1)} km
+                        ${Number(
+                            activity.distance_km
+                        ).toFixed(1)} km
                     </div>
 
                 </div>
@@ -2266,14 +3127,16 @@ function activityCardHTML(
 
                     ${
                         duration
-                            ? `<span>⏱ ${duration}</span>`
+                            ? `<span>⏱ ${escapeHTML(duration)}</span>`
                             : ""
                     }
 
                     <span>
-                        Day ${getChallengeDay(
-                            activity.activity_date
-                        )}
+                        Day ${
+                            getChallengeDay(
+                                activity.activity_date
+                            )
+                        }
                     </span>
 
                 </div>
@@ -2287,7 +3150,7 @@ function activityCardHTML(
                                     activity.caption
                                 )}
                             </div>
-                          `
+                        `
                         : ""
                 }
 
@@ -2320,7 +3183,6 @@ document.addEventListener(
 
 
         if (!button) {
-
             return;
         }
 
@@ -2336,7 +3198,6 @@ document.addEventListener(
 
 
         if (!confirmed) {
-
             return;
         }
 
@@ -2371,6 +3232,7 @@ document.addEventListener(
                 error.message
             );
 
+
             button.disabled =
                 false;
 
@@ -2384,6 +3246,9 @@ document.addEventListener(
         await loadLeaderboard();
 
         await loadProfilePage();
+
+        await loadStreak();
+
 
         showToast(
             "Activity deleted."
@@ -2399,16 +3264,20 @@ document.addEventListener(
 
 async function loadLeaderboard() {
 
-    if (!currentChallenge) {
-
-        return;
-    }
-
-
     const container =
         document.getElementById(
             "leaderboard-list"
         );
+
+
+    if (
+        !container ||
+        !currentChallenge
+    ) {
+
+        return;
+
+    }
 
 
     container.innerHTML = `
@@ -2418,16 +3287,100 @@ async function loadLeaderboard() {
     `;
 
 
-    /*
-       Get EVERY participant.
-    */
+    try {
+
+        const rankings =
+            await getLeaderboardData();
+
+
+        const list =
+            selectedBoard === "cycle"
+                ? rankings.cycle
+                : rankings.runwalk;
+
+
+        if (!list.length) {
+
+            container.innerHTML = `
+                <div class="empty-state">
+
+                    <h3>
+                        No participants yet
+                    </h3>
+
+                    <p>
+                        Invite your HUNDO crew to get started.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            list
+                .map(
+                    (
+                        athlete,
+                        index
+                    ) =>
+                        renderLeaderboardRow(
+                            athlete,
+                            index + 1
+                        )
+                )
+                .join("");
+
+    } catch (error) {
+
+        console.error(
+            "Leaderboard error:",
+            error
+        );
+
+
+        container.innerHTML = `
+            <div class="empty-state">
+
+                <h3>
+                    Could not load leaderboard.
+                </h3>
+
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   GET LEADERBOARD DATA
+========================================================= */
+
+async function getLeaderboardData() {
+
+    if (!currentChallenge) {
+
+        return {
+            runwalk: [],
+            cycle: []
+        };
+
+    }
+
 
     const {
         data: participants,
         error: participantError
     } =
         await supabaseClient
-            .from("challenge_participants")
+            .from(
+                "challenge_participants"
+            )
             .select(
                 `
                 user_id,
@@ -2454,61 +3407,79 @@ async function loadLeaderboard() {
 
     if (participantError) {
 
-        console.error(
-            participantError
-        );
+        throw participantError;
 
-        container.innerHTML = `
-            <div class="empty-state">
-                Could not load leaderboard.
-            </div>
-        `;
-
-        return;
     }
 
 
-    /*
-       Get all activities.
-    */
+    const {
+        data: activities,
+        error: activityError
+    } =
+        await supabaseClient
+            .from("activities")
+            .select(
+                `
+                user_id,
+                activity_type,
+                distance_km
+                `
+            )
+            .eq(
+                "challenge_id",
+                currentChallenge.id
+            );
 
-    const activities =
-        await fetchChallengeActivities();
+
+    if (activityError) {
+
+        throw activityError;
+
+    }
 
 
     const totals = {};
 
 
-    (participants || [])
-        .forEach(
-            participant => {
+    (
+        participants || []
+    ).forEach(
+        participant => {
 
-                totals[
-                    participant.user_id
-                ] = {
-                    user_id:
-                        participant.user_id,
+            totals[
+                participant.user_id
+            ] = {
 
-                    name:
-                        participant.profiles?.name ||
-                        "HUNDO athlete",
+                user_id:
+                    participant.user_id,
 
-                    photo:
-                        participant.profiles?.profile_photo_url ||
-                        null,
+                name:
+                    participant.profiles?.name ||
+                    "HUNDO athlete",
 
-                    runwalk:
-                        0,
+                age:
+                    participant.profiles?.age ||
+                    null,
 
-                    cycle:
-                        0
-                };
+                photo:
+                    participant.profiles?.profile_photo_url ||
+                    null,
 
-            }
-        );
+                runwalk:
+                    0,
+
+                cycle:
+                    0
+
+            };
+
+        }
+    );
 
 
-    activities.forEach(
+    (
+        activities || []
+    ).forEach(
         activity => {
 
             if (
@@ -2518,6 +3489,7 @@ async function loadLeaderboard() {
             ) {
 
                 return;
+
             }
 
 
@@ -2528,9 +3500,16 @@ async function loadLeaderboard() {
 
 
             if (
-                activity.activity_type === "run" ||
-                activity.activity_type === "walk"
+                activity.activity_type ===
+                "cycle"
             ) {
+
+                totals[
+                    activity.user_id
+                ].cycle +=
+                    distance;
+
+            } else {
 
                 totals[
                     activity.user_id
@@ -2539,240 +3518,37 @@ async function loadLeaderboard() {
 
             }
 
-
-            if (
-                activity.activity_type === "cycle"
-            ) {
-
-                totals[
-                    activity.user_id
-                ].cycle +=
-                    distance;
-
-            }
-
         }
     );
 
 
-    const list =
+    const all =
         Object.values(
             totals
         );
 
 
-    list.sort(
-        (a, b) =>
-            b[selectedBoard] -
-            a[selectedBoard]
-    );
-
-
-    container.innerHTML =
-        list
-            .map(
-                (person, index) =>
-                    leaderboardRowHTML(
-                        person,
-                        index + 1
-                    )
-            )
-            .join("");
-
-
-    if (!list.length) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                <h3>No participants yet</h3>
-                <p>Join HUNDO to appear here.</p>
-            </div>
-        `;
-
-    }
-
-}
-
-
-/* =========================================================
-   LEADERBOARD ROW
-========================================================= */
-
-function leaderboardRowHTML(
-    person,
-    rank
-) {
-
-    const distance =
-        Number(
-            person[selectedBoard]
-        ) || 0;
-
-
-    const avatar =
-        person.photo
-            ? `
-                <img
-                    src="${escapeAttribute(person.photo)}"
-                    alt=""
-                >
-              `
-            : "👤";
-
-
-    const isMe =
-        person.user_id ===
-        currentUser.id;
-
-
-    return `
-        <div class="leaderboard-row ${isMe ? "me" : ""}">
-
-            <div class="leaderboard-rank">
-                #${rank}
-            </div>
-
-
-            <div class="leaderboard-person">
-
-                <div class="leaderboard-avatar">
-                    ${avatar}
-                </div>
-
-                <div>
-
-                    <div class="leaderboard-name">
-                        ${escapeHTML(person.name)}
-                    </div>
-
-                    ${
-                        isMe
-                            ? `
-                                <div class="leaderboard-you">
-                                    You
-                                </div>
-                              `
-                            : ""
-                    }
-
-                </div>
-
-            </div>
-
-
-            <div class="leaderboard-distance">
-                ${distance.toFixed(1)} km
-            </div>
-
-        </div>
-    `;
-
-}
-
-
-/* =========================================================
-   RANKINGS
-========================================================= */
-
-function calculateRankings(
-    activities
-) {
-
-    const totals = {};
-
-
-    activities.forEach(
-        activity => {
-
-            if (
-                !totals[
-                    activity.user_id
-                ]
-            ) {
-
-                totals[
-                    activity.user_id
-                ] = {
-                    user_id:
-                        activity.user_id,
-
-                    runwalk:
-                        0,
-
-                    cycle:
-                        0
-                };
-
-            }
-
-
-            const distance =
-                Number(
-                    activity.distance_km
-                ) || 0;
-
-
-            if (
-                activity.activity_type === "run" ||
-                activity.activity_type === "walk"
-            ) {
-
-                totals[
-                    activity.user_id
-                ].runwalk +=
-                    distance;
-
-            }
-
-
-            if (
-                activity.activity_type === "cycle"
-            ) {
-
-                totals[
-                    activity.user_id
-                ].cycle +=
-                    distance;
-
-            }
-
-        }
-    );
-
-
     const runwalk =
-        Object.values(
-            totals
-        )
+        [...all]
             .sort(
-                (a, b) =>
+                (
+                    a,
+                    b
+                ) =>
                     b.runwalk -
                     a.runwalk
-            )
-            .map(
-                (item, index) => ({
-                    ...item,
-                    rank:
-                        index + 1
-                })
             );
 
 
     const cycle =
-        Object.values(
-            totals
-        )
+        [...all]
             .sort(
-                (a, b) =>
+                (
+                    a,
+                    b
+                ) =>
                     b.cycle -
                     a.cycle
-            )
-            .map(
-                (item, index) => ({
-                    ...item,
-                    rank:
-                        index + 1
-                })
             );
 
 
@@ -2785,308 +3561,327 @@ function calculateRankings(
 
 
 /* =========================================================
-   PROFILE PAGE
+   LEADERBOARD ROW
 ========================================================= */
 
-async function loadProfilePage() {
+function renderLeaderboardRow(
+    athlete,
+    rank
+) {
 
-    if (!currentUser) {
-
-        return;
-    }
-
-
-    const activities =
-        await fetchChallengeActivities();
+    const isCurrentUser =
+        athlete.user_id ===
+        currentUser?.id;
 
 
-    const mine =
-        activities
-            .filter(
-                activity =>
-                    activity.user_id ===
-                    currentUser.id
-            )
-            .sort(
-                (a, b) =>
-                    new Date(b.created_at) -
-                    new Date(a.created_at)
-            );
+    const medal =
+        rank === 1
+            ? "🥇"
+            : rank === 2
+                ? "🥈"
+                : rank === 3
+                    ? "🥉"
+                    : "";
 
 
-    const runWalk =
-        sumDistance(
-            mine.filter(
-                activity =>
-                    activity.activity_type === "run" ||
-                    activity.activity_type === "walk"
-            )
-        );
+    const distance =
+        selectedBoard === "cycle"
+            ? athlete.cycle
+            : athlete.runwalk;
 
 
-    const cycling =
-        sumDistance(
-            mine.filter(
-                activity =>
-                    activity.activity_type === "cycle"
-            )
-        );
+    const avatar =
+        athlete.photo
+            ? `
+                <img
+                    src="${escapeAttribute(
+                        addCacheBuster(
+                            athlete.photo
+                        )
+                    )}"
+                    alt=""
+                >
+            `
+            : "👤";
 
 
-    document
-        .getElementById(
-            "profile-run-walk"
-        )
-        .textContent =
-            `${runWalk.toFixed(1)} km`;
+    return `
+        <div
+            class="
+                leaderboard-row
+                ${isCurrentUser ? "current-user" : ""}
+                ${rank === 1 ? "top-one" : ""}
+            "
+        >
 
+            <div class="leaderboard-rank">
 
-    document
-        .getElementById(
-            "profile-cycling"
-        )
-        .textContent =
-            `${cycling.toFixed(1)} km`;
+                ${
+                    medal
+                        ? `
+                            <span class="leaderboard-medal">
+                                ${medal}
+                            </span>
+                        `
+                        : rank
+                }
 
-
-    const history =
-        document.getElementById(
-            "activity-history"
-        );
-
-
-    if (!mine.length) {
-
-        history.innerHTML = `
-            <div class="empty-state">
-                No activities yet.
             </div>
-        `;
-
-    } else {
-
-        history.innerHTML =
-            mine
-                .map(
-                    activity => {
-
-                        const icon =
-                            activity.activity_type === "run"
-                                ? "🏃 Run"
-                                : activity.activity_type === "walk"
-                                    ? "🚶 Walk"
-                                    : "🚴 Cycle";
 
 
-                        return `
-                            <div class="history-item">
-
-                                <div class="history-left">
-
-                                    <strong>
-                                        ${icon}
-                                    </strong>
-
-                                    <span>
-                                        ${formatDate(
-                                            activity.activity_date
-                                        )}
-                                    </span>
-
-                                </div>
+            <div class="leaderboard-avatar">
+                ${avatar}
+            </div>
 
 
-                                <div class="history-right">
+            <div class="leaderboard-info">
 
-                                    <div class="history-distance">
-                                        ${Number(
-                                            activity.distance_km
-                                        ).toFixed(1)} km
-                                    </div>
+                <div class="leaderboard-name">
 
-                                    ${
-                                        activity.duration_minutes
-                                            ? `
-                                                <div class="history-duration">
-                                                    ${formatDuration(
-                                                        activity.duration_minutes
-                                                    )}
-                                                </div>
-                                              `
-                                            : ""
-                                    }
+                    ${escapeHTML(
+                        athlete.name
+                    )}
 
-                                </div>
-
-                            </div>
-                        `;
-
+                    ${
+                        isCurrentUser
+                            ? `
+                                <span class="leaderboard-you">
+                                    YOU
+                                </span>
+                            `
+                            : ""
                     }
-                )
-                .join("");
 
-    }
+                </div>
 
 
-    await loadWeights();
+                <div class="leaderboard-subtitle">
+
+                    ${
+                        athlete.age
+                            ? `Age ${athlete.age}`
+                            : "HUNDO athlete"
+                    }
+
+                </div>
+
+            </div>
+
+
+            <div class="leaderboard-distance">
+
+                <strong>
+                    ${distance.toFixed(1)}
+                </strong>
+
+                <span>
+                    km
+                </span>
+
+            </div>
+
+        </div>
+    `;
 
 }
 
 
 /* =========================================================
-   WEIGHT
+   PROFILE PAGE
 ========================================================= */
 
-async function addWeight(event) {
-
-    event.preventDefault();
-
-
-    const input =
-        document.getElementById(
-            "weight-input"
-        );
-
-
-    const weight =
-        Number(
-            input.value
-        );
-
+async function loadProfilePage() {
 
     if (
-        !weight ||
-        weight <= 0
+        !currentUser ||
+        !currentChallenge
     ) {
 
-        showToast(
-            "Enter a valid weight."
-        );
-
         return;
+
     }
 
 
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("weight_logs")
-            .insert(
-                {
-                    user_id:
-                        currentUser.id,
-
-                    weight_kg:
-                        weight,
-
-                    logged_date:
-                        getLocalDateString()
-                }
-            );
+    const activities =
+        await fetchUserChallengeActivities();
 
 
-    if (error) {
+    let runWalkTotal = 0;
 
-        console.error(
-            error
-        );
-
-        showToast(
-            error.message
-        );
-
-        return;
-    }
+    let cyclingTotal = 0;
 
 
-    input.value = "";
+    activities.forEach(
+        activity => {
+
+            const distance =
+                Number(
+                    activity.distance_km
+                ) || 0;
 
 
-    await loadWeights();
+            if (
+                activity.activity_type ===
+                "cycle"
+            ) {
+
+                cyclingTotal +=
+                    distance;
+
+            } else {
+
+                runWalkTotal +=
+                    distance;
+
+            }
+
+        }
+    );
 
 
-    showToast(
-        "Weight added ✓"
+    setText(
+        "profile-run-walk",
+        `${runWalkTotal.toFixed(1)} km`
+    );
+
+
+    setText(
+        "profile-cycling",
+        `${cyclingTotal.toFixed(1)} km`
+    );
+
+
+    renderActivityHistory(
+        activities
     );
 
 }
 
 
-async function loadWeights() {
+/* =========================================================
+   ACTIVITY HISTORY
+========================================================= */
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from("weight_logs")
-            .select(
-                "weight_kg, logged_date, created_at"
-            )
-            .eq(
-                "user_id",
-                currentUser.id
-            )
-            .order(
-                "logged_date",
-                {
-                    ascending: false
-                }
-            )
-            .limit(30);
+function renderActivityHistory(
+    activities
+) {
 
-
-    if (error) {
-
-        console.error(
-            error
+    const container =
+        document.getElementById(
+            "activity-history"
         );
 
+
+    if (!container) {
         return;
     }
 
 
-    const container =
-        document.getElementById(
-            "weight-history"
-        );
-
-
-    if (!data || !data.length) {
+    if (
+        !activities ||
+        !activities.length
+    ) {
 
         container.innerHTML = `
-            <div class="weight-entry">
-                <span>No weight entries yet.</span>
-                <span>Private</span>
+            <div class="empty-state">
+                No activities yet.
             </div>
         `;
 
         return;
+
     }
 
 
+    const sorted =
+        [...activities]
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
+                    new Date(
+                        b.activity_date
+                    ) -
+                    new Date(
+                        a.activity_date
+                    )
+            );
+
+
     container.innerHTML =
-        data
+        sorted
             .map(
-                item =>
-                    `
-                    <div class="weight-entry">
+                activity => {
 
-                        <span>
-                            ${formatDate(
-                                item.logged_date
-                            )}
-                        </span>
+                    const icon =
+                        activity.activity_type ===
+                        "cycle"
+                            ? "🚴"
+                            : activity.activity_type ===
+                              "walk"
+                                ? "🚶"
+                                : "🏃";
 
-                        <strong>
-                            ${Number(
-                                item.weight_kg
-                            ).toFixed(1)} kg
-                        </strong>
 
-                    </div>
-                    `
+                    const type =
+                        activity.activity_type ===
+                        "cycle"
+                            ? "Cycling"
+                            : activity.activity_type ===
+                              "walk"
+                                ? "Walk"
+                                : "Run";
+
+
+                    const duration =
+                        formatDuration(
+                            activity.duration_seconds,
+                            activity.duration_minutes
+                        );
+
+
+                    return `
+                        <div class="activity-history-item">
+
+                            <div class="activity-history-icon">
+                                ${icon}
+                            </div>
+
+
+                            <div class="activity-history-info">
+
+                                <strong>
+                                    ${type}
+                                </strong>
+
+                                <small>
+                                    ${formatDate(
+                                        activity.activity_date
+                                    )}
+
+                                    ${
+                                        duration
+                                            ? ` · ${escapeHTML(
+                                                duration
+                                            )}`
+                                            : ""
+                                    }
+                                </small>
+
+                            </div>
+
+
+                            <div class="activity-history-distance">
+                                ${Number(
+                                    activity.distance_km
+                                ).toFixed(1)} km
+                            </div>
+
+                        </div>
+                    `;
+
+                }
             )
             .join("");
 
@@ -3094,91 +3889,237 @@ async function loadWeights() {
 
 
 /* =========================================================
-   NAVIGATION
+   USER ACTIVITIES
 ========================================================= */
 
-async function showPage(
-    pageId
-) {
+async function fetchUserChallengeActivities() {
 
-    document
-        .querySelectorAll(".page")
-        .forEach(
-            page =>
-                page.classList.add(
-                    "hidden"
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("activities")
+            .select(
+                `
+                *,
+                activity_photos (
+                    id,
+                    photo_url
                 )
-        );
+                `
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .eq(
+                "challenge_id",
+                currentChallenge.id
+            )
+            .order(
+                "activity_date",
+                {
+                    ascending: false
+                }
+            );
 
 
-    const page =
-        document.getElementById(
-            pageId
-        );
+    if (error) {
+
+        throw error;
+
+    }
 
 
-    if (!page) {
+    return data || [];
+
+}
+
+
+/* =========================================================
+   CHALLENGE ACTIVITIES
+========================================================= */
+
+async function fetchChallengeActivities() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("activities")
+            .select(
+                `
+                id,
+                user_id,
+                challenge_id,
+                activity_type,
+                distance_km,
+                duration_minutes,
+                duration_seconds,
+                activity_date,
+                caption,
+                created_at
+                `
+            )
+            .eq(
+                "challenge_id",
+                currentChallenge.id
+            );
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    return data || [];
+
+}
+
+
+/* =========================================================
+   STREAK
+========================================================= */
+
+async function loadStreak() {
+
+    if (
+        !currentUser ||
+        !currentChallenge
+    ) {
 
         return;
+
     }
 
 
-    page.classList.remove(
-        "hidden"
-    );
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("activities")
+            .select(
+                "activity_date"
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .eq(
+                "challenge_id",
+                currentChallenge.id
+            );
 
 
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(
-            item => {
+    if (error) {
 
-                item.classList.toggle(
-                    "active",
-                    item.dataset.page ===
-                        pageId
-                );
+        console.error(
+            "Streak error:",
+            error
+        );
 
-            }
+        setText(
+            "current-streak",
+            "0"
+        );
+
+        return;
+
+    }
+
+
+    const dates =
+        new Set(
+            (
+                data || []
+            ).map(
+                activity =>
+                    activity.activity_date
+            )
         );
 
 
-    window.scrollTo(
-        {
-            top: 0,
-            behavior: "instant"
-        }
+    let streak = 0;
+
+    let cursor =
+        new Date();
+
+
+    cursor.setHours(
+        0,
+        0,
+        0,
+        0
     );
 
 
+    /*
+       Count consecutive activity days
+       ending today.
+
+       If today has no activity,
+       check yesterday so the current
+       streak isn't immediately lost
+       before the user logs today.
+    */
+
+    const todayISO =
+        toISODate(
+            cursor
+        );
+
+
     if (
-        pageId ===
-        "leaderboard-page"
+        !dates.has(
+            todayISO
+        )
     ) {
 
-        await loadLeaderboard();
+        cursor.setDate(
+            cursor.getDate() - 1
+        );
 
     }
 
 
-    if (
-        pageId ===
-        "profile-page"
-    ) {
+    while (true) {
 
-        await loadProfilePage();
+        const dateISO =
+            toISODate(
+                cursor
+            );
+
+
+        if (
+            !dates.has(
+                dateISO
+            )
+        ) {
+
+            break;
+
+        }
+
+
+        streak++;
+
+
+        cursor.setDate(
+            cursor.getDate() - 1
+        );
 
     }
 
 
-    if (
-        pageId ===
-        "home-page"
-    ) {
-
-        await loadHome();
-
-    }
+    setText(
+        "current-streak",
+        String(streak)
+    );
 
 }
 
@@ -3189,61 +4130,161 @@ async function showPage(
 
 function updateDayCounter() {
 
-    const day =
-        getChallengeDay(
-            getLocalDateString()
-        );
+    if (
+        !currentChallenge
+    ) {
 
+        return;
 
-    document
-        .getElementById(
-            "current-day"
-        )
-        .textContent =
-            day;
-
-}
-
-
-function getChallengeDay(
-    dateString
-) {
-
-    if (!currentChallenge) {
-
-        return 1;
     }
 
 
     const start =
-        parseLocalDate(
+        parseDateOnly(
             currentChallenge.start_date
         );
 
 
-    const date =
-        parseLocalDate(
-            dateString
+    const today =
+        parseDateOnly(
+            getTodayISO()
         );
 
 
-    const difference =
+    const end =
+        parseDateOnly(
+            currentChallenge.end_date
+        );
+
+
+    let day =
         Math.floor(
             (
-                date.getTime() -
-                start.getTime()
+                today - start
             ) /
             86400000
+        ) + 1;
+
+
+    if (
+        today < start
+    ) {
+
+        day = 0;
+
+    }
+
+
+    if (
+        today > end
+    ) {
+
+        day = 100;
+
+    }
+
+
+    day =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                day
+            )
         );
 
 
-    return Math.min(
-        100,
-        Math.max(
-            1,
-            difference + 1
-        )
+    setText(
+        "current-day",
+        String(day)
     );
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showPage(
+    pageId
+) {
+
+    document
+        .querySelectorAll(
+            ".page"
+        )
+        .forEach(
+            page => {
+
+                page.classList.add(
+                    "hidden"
+                );
+
+            }
+        );
+
+
+    const page =
+        document.getElementById(
+            pageId
+        );
+
+
+    if (page) {
+
+        page.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".nav-item"
+        )
+        .forEach(
+            item => {
+
+                item.classList.toggle(
+                    "active",
+                    item.dataset.page ===
+                    pageId
+                );
+
+            }
+        );
+
+
+    if (
+        pageId ===
+        "leaderboard-page"
+    ) {
+
+        loadLeaderboard();
+
+    }
+
+
+    if (
+        pageId ===
+        "profile-page"
+    ) {
+
+        loadProfilePage();
+
+    }
+
+
+    if (
+        pageId ===
+        "log-page"
+    ) {
+
+        setupActivityDate();
+
+    }
 
 }
 
@@ -3252,83 +4293,308 @@ function getChallengeDay(
    HELPERS
 ========================================================= */
 
-function sumDistance(
-    activities
+function setText(
+    id,
+    value
 ) {
 
-    return activities.reduce(
-        (
-            total,
-            activity
-        ) =>
-            total +
-            (
-                Number(
-                    activity.distance_km
-                ) || 0
-            ),
-        0
-    );
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
 
 }
 
 
-function formatDuration(
-    totalMinutes
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+    message
 ) {
 
+    let toast =
+        document.getElementById(
+            "hundo-toast"
+        );
+
+
+    if (!toast) {
+
+        toast =
+            document.createElement(
+                "div"
+            );
+
+
+        toast.id =
+            "hundo-toast";
+
+
+        Object.assign(
+            toast.style,
+            {
+                position: "fixed",
+                left: "50%",
+                bottom: "100px",
+                transform: "translateX(-50%)",
+                zIndex: "99999",
+                maxWidth: "calc(100% - 40px)",
+                padding: "12px 17px",
+                borderRadius: "12px",
+                background: "#ffffff",
+                color: "#0b0b0b",
+                fontSize: "13px",
+                fontWeight: "700",
+                textAlign: "center",
+                boxShadow:
+                    "0 8px 30px rgba(0,0,0,.35)"
+            }
+        );
+
+
+        document.body.appendChild(
+            toast
+        );
+
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.style.opacity =
+        "1";
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            () => {
+
+                toast.style.opacity =
+                    "0";
+
+            },
+            2800
+        );
+
+}
+
+
+/* =========================================================
+   FORMAT DURATION
+========================================================= */
+
+function formatDuration(
+    durationSeconds,
+    durationMinutes
+) {
+
+    let totalSeconds =
+        Number(
+            durationSeconds
+        );
+
+
     if (
-        !totalMinutes ||
-        totalMinutes <= 0
+        !Number.isFinite(
+            totalSeconds
+        ) ||
+        totalSeconds <= 0
     ) {
 
-        return "";
+        const minutes =
+            Number(
+                durationMinutes
+            );
+
+
+        if (
+            !Number.isFinite(
+                minutes
+            ) ||
+            minutes <= 0
+        ) {
+
+            return "";
+
+        }
+
+
+        totalSeconds =
+            Math.round(
+                minutes * 60
+            );
 
     }
 
 
     const hours =
         Math.floor(
-            totalMinutes / 60
+            totalSeconds / 3600
         );
 
+
     const minutes =
-        totalMinutes % 60;
+        Math.floor(
+            (
+                totalSeconds %
+                3600
+            ) / 60
+        );
 
 
-    if (hours && minutes) {
+    const seconds =
+        totalSeconds %
+        60;
 
-        return `${hours}h ${minutes}m`;
+
+    const parts = [];
+
+
+    if (hours > 0) {
+
+        parts.push(
+            `${hours}h`
+        );
 
     }
 
 
-    if (hours) {
+    if (
+        minutes > 0 ||
+        hours > 0
+    ) {
 
-        return `${hours}h`;
+        parts.push(
+            `${minutes}m`
+        );
 
     }
 
 
-    return `${minutes}m`;
+    if (
+        seconds > 0 ||
+        (
+            hours === 0 &&
+            minutes === 0
+        )
+    ) {
+
+        parts.push(
+            `${seconds}s`
+        );
+
+    }
+
+
+    return parts.join(
+        " "
+    );
+
+}
+
+
+/* =========================================================
+   DATE HELPERS
+========================================================= */
+
+function getTodayISO() {
+
+    const date =
+        new Date();
+
+
+    return toISODate(
+        date
+    );
+
+}
+
+
+function toISODate(
+    date
+) {
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function parseDateOnly(
+    value
+) {
+
+    const [
+        year,
+        month,
+        day
+    ] =
+        String(value)
+            .split("-")
+            .map(
+                Number
+            );
+
+
+    return new Date(
+        year,
+        month - 1,
+        day
+    );
 
 }
 
 
 function formatDate(
-    dateString
+    value
 ) {
 
-    if (!dateString) {
-
+    if (!value) {
         return "";
-
     }
 
 
     const date =
-        parseLocalDate(
-            dateString
+        parseDateOnly(
+            value
         );
 
 
@@ -3344,112 +4610,118 @@ function formatDate(
 }
 
 
-function parseLocalDate(
-    dateString
+function getChallengeDay(
+    activityDate
 ) {
-
-    const [
-        year,
-        month,
-        day
-    ] =
-        String(
-            dateString
-        )
-            .split("-")
-            .map(Number);
-
-
-    return new Date(
-        year,
-        month - 1,
-        day
-    );
-
-}
-
-
-function getLocalDateString() {
-
-    const now =
-        new Date();
-
-
-    const year =
-        now.getFullYear();
-
-
-    const month =
-        String(
-            now.getMonth() + 1
-        )
-            .padStart(
-                2,
-                "0"
-            );
-
-
-    const day =
-        String(
-            now.getDate()
-        )
-            .padStart(
-                2,
-                "0"
-            );
-
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-function getExtension(
-    filename
-) {
-
-    const extension =
-        filename
-            .split(".")
-            .pop()
-            .toLowerCase();
-
 
     if (
-        [
-            "jpg",
-            "jpeg",
-            "png",
-            "webp",
-            "gif",
-            "heic"
-        ].includes(
-            extension
-        )
+        !currentChallenge ||
+        !activityDate
     ) {
 
-        return extension;
+        return "—";
 
     }
 
 
-    return "jpg";
+    const start =
+        parseDateOnly(
+            currentChallenge.start_date
+        );
+
+
+    const date =
+        parseDateOnly(
+            activityDate
+        );
+
+
+    let day =
+        Math.floor(
+            (
+                date - start
+            ) /
+            86400000
+        ) + 1;
+
+
+    day =
+        Math.max(
+            1,
+            Math.min(
+                100,
+                day
+            )
+        );
+
+
+    return day;
 
 }
 
 
-function firstName(
-    name
+/* =========================================================
+   FILE HELPERS
+========================================================= */
+
+function getFileExtension(
+    file
 ) {
 
-    return String(
-        name
-    )
-        .trim()
-        .split(/\s+/)[0];
+    const fromName =
+        file.name
+            .split(".")
+            .pop()
+            ?.toLowerCase();
+
+
+    if (
+        fromName &&
+        /^[a-z0-9]+$/.test(
+            fromName
+        )
+    ) {
+
+        return fromName;
+
+    }
+
+
+    const mime =
+        file.type
+            .split("/")
+            .pop()
+            ?.toLowerCase();
+
+
+    return mime || "jpg";
 
 }
 
+
+/* =========================================================
+   CACHE BUSTER
+========================================================= */
+
+function addCacheBuster(
+    url
+) {
+
+    if (!url) {
+        return "";
+    }
+
+
+    return url.includes("?")
+        ? `${url}&v=${Date.now()}`
+        : `${url}?v=${Date.now()}`;
+
+}
+
+
+/* =========================================================
+   ESCAPING
+========================================================= */
 
 function escapeHTML(
     value
@@ -3458,24 +4730,24 @@ function escapeHTML(
     return String(
         value ?? ""
     )
-        .replaceAll(
-            "&",
+        .replace(
+            /&/g,
             "&amp;"
         )
-        .replaceAll(
-            "<",
+        .replace(
+            /</g,
             "&lt;"
         )
-        .replaceAll(
-            ">",
+        .replace(
+            />/g,
             "&gt;"
         )
-        .replaceAll(
-            '"',
+        .replace(
+            /"/g,
             "&quot;"
         )
-        .replaceAll(
-            "'",
+        .replace(
+            /'/g,
             "&#039;"
         );
 
@@ -3491,902 +4763,3 @@ function escapeAttribute(
     );
 
 }
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(
-    message
-) {
-
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    if (!toast) {
-
-        return;
-    }
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toast.textContent =
-        message;
-
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    toastTimer =
-        setTimeout(
-            () => {
-
-                toast.classList.remove(
-                    "show"
-                );
-
-            },
-            3000
-        );
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-async function logout() {
-
-    const confirmed =
-        window.confirm(
-            "Log out of HUNDO?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-    }
-
-
-    await supabaseClient.auth.signOut();
-
-}
-
-
-/* =========================================================
-   READY
-========================================================= */
-
-console.log(
-    "HUNDO loaded."
-);
-
-/* =================================================
-   EDIT PROFILE TOGGLE
-================================================= */
-
-const editProfileButton =
-    document.getElementById("edit-profile-button");
-
-const closeProfileEditor =
-    document.getElementById("close-profile-editor");
-
-const profileEditor =
-    document.getElementById("profile-editor");
-
-if (editProfileButton && profileEditor) {
-
-    editProfileButton.addEventListener(
-        "click",
-        function () {
-
-            profileEditor.classList.remove("hidden");
-
-            editProfileButton.classList.add("hidden");
-
-            window.scrollTo({
-                top: profileEditor.offsetTop - 20,
-                behavior: "smooth"
-            });
-
-        }
-    );
-}
-
-if (closeProfileEditor && profileEditor) {
-
-    closeProfileEditor.addEventListener(
-        "click",
-        function () {
-
-            profileEditor.classList.add("hidden");
-
-            if (editProfileButton) {
-                editProfileButton.classList.remove("hidden");
-            }
-
-        }
-    );
-}
-
-/* =====================================================
-   HUNDO FIX PACK
-   - Startup splash
-   - Session loading
-   - Profile photo upload
-   - Profile photo preview
-   - Streak counter
-===================================================== */
-
-(function () {
-
-    /* =================================================
-       STARTUP SPLASH
-    ================================================= */
-
-    const splash =
-        document.getElementById("hundo-splash");
-
-    function hideHundoSplash() {
-
-        if (!splash) return;
-
-        splash.classList.add(
-            "splash-hidden"
-        );
-
-        setTimeout(function () {
-
-            splash.remove();
-
-        }, 500);
-
-    }
-
-
-    /* =================================================
-       PROFILE PHOTO ELEMENTS
-    ================================================= */
-
-    const profilePicture =
-        document.getElementById(
-            "profile-picture"
-        );
-
-    const profilePhotoButton =
-        document.getElementById(
-            "profile-photo-button"
-        );
-
-    const profilePhotoInput =
-        document.getElementById(
-            "profile-photo-input"
-        );
-
-
-    /* =================================================
-       PROFILE PHOTO DISPLAY
-    ================================================= */
-
-    function displayProfilePhoto(url) {
-
-        if (!profilePicture) return;
-
-        if (!url) {
-
-            profilePicture.innerHTML = "👤";
-
-            return;
-        }
-
-        profilePicture.innerHTML = "";
-
-        const image =
-            document.createElement("img");
-
-        image.src = url;
-
-        image.alt = "Profile picture";
-
-        image.loading = "eager";
-
-        image.onerror = function () {
-
-            profilePicture.innerHTML = "👤";
-
-        };
-
-        profilePicture.appendChild(
-            image
-        );
-
-    }
-
-
-    /* =================================================
-       OPEN FILE PICKER
-    ================================================= */
-
-    if (
-        profilePhotoButton &&
-        profilePhotoInput
-    ) {
-
-        profilePhotoButton.addEventListener(
-            "click",
-            function () {
-
-                profilePhotoInput.click();
-
-            }
-        );
-
-    }
-
-
-    /* =================================================
-       UPLOAD PROFILE PHOTO
-    ================================================= */
-
-    async function uploadProfilePhoto(file) {
-
-        if (!file) return;
-
-        if (!supabaseClient) {
-
-            alert(
-                "HUNDO is still connecting. Please try again."
-            );
-
-            return;
-        }
-
-
-        const {
-            data: {
-                user
-            },
-            error: userError
-        } =
-            await supabaseClient.auth
-                .getUser();
-
-
-        if (
-            userError ||
-            !user
-        ) {
-
-            alert(
-                "Your session could not be found."
-            );
-
-            return;
-        }
-
-
-        /* ---------------------------------------------
-           FILE VALIDATION
-        --------------------------------------------- */
-
-        if (
-            !file.type.startsWith(
-                "image/"
-            )
-        ) {
-
-            alert(
-                "Please choose an image."
-            );
-
-            return;
-        }
-
-
-        if (
-            file.size >
-            50 * 1024 * 1024
-        ) {
-
-            alert(
-                "That image is too large. Please choose one under 50 MB."
-            );
-
-            return;
-        }
-
-
-        /* ---------------------------------------------
-           TEMPORARY LOCAL PREVIEW
-        --------------------------------------------- */
-
-        const localUrl =
-            URL.createObjectURL(file);
-
-        displayProfilePhoto(
-            localUrl
-        );
-
-
-        /* ---------------------------------------------
-           UNIQUE FILE PATH
-        --------------------------------------------- */
-
-        const extension =
-            file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
-
-        const filePath =
-            user.id +
-            "/profile-" +
-            Date.now() +
-            "." +
-            extension;
-
-
-        /* ---------------------------------------------
-           UPLOAD
-        --------------------------------------------- */
-
-        const {
-            error: uploadError
-        } =
-            await supabaseClient
-                .storage
-                .from("Profile pictures")
-                .upload(
-                    filePath,
-                    file,
-                    {
-                        upsert: true,
-                        cacheControl: "3600"
-                    }
-                );
-
-
-        if (uploadError) {
-
-            console.error(
-                "Profile photo upload error:",
-                uploadError
-            );
-
-            alert(
-                "Profile picture could not be uploaded."
-            );
-
-            return;
-        }
-
-
-        /* ---------------------------------------------
-           PUBLIC URL
-        --------------------------------------------- */
-
-        const {
-            data: publicData
-        } =
-            supabaseClient
-                .storage
-                .from("Profile pictures")
-                .getPublicUrl(
-                    filePath
-                );
-
-
-        const publicUrl =
-            publicData.publicUrl;
-
-
-        /* ---------------------------------------------
-           SAVE URL TO PROFILE
-        --------------------------------------------- */
-
-        const {
-            error: profileError
-        } =
-            await supabaseClient
-                .from("profiles")
-                .update({
-                    profile_photo_url:
-                        publicUrl
-                })
-                .eq(
-                    "id",
-                    user.id
-                );
-
-
-        if (profileError) {
-
-            console.error(
-                "Profile photo database error:",
-                profileError
-            );
-
-            alert(
-                "Photo uploaded, but the profile could not be updated."
-            );
-
-            return;
-        }
-
-
-        /* ---------------------------------------------
-           SHOW PERMANENT URL
-        --------------------------------------------- */
-
-        displayProfilePhoto(
-            publicUrl +
-            "?v=" +
-            Date.now()
-        );
-
-
-        /* ---------------------------------------------
-           UPDATE ANY PROFILE PHOTO ELEMENTS
-        --------------------------------------------- */
-
-        document
-            .querySelectorAll(
-                "[data-profile-photo]"
-            )
-            .forEach(
-                function (element) {
-
-                    element.src =
-                        publicUrl +
-                        "?v=" +
-                        Date.now();
-
-                }
-            );
-
-
-        console.log(
-            "HUNDO: Profile photo updated."
-        );
-
-    }
-
-
-    /* =================================================
-       PHOTO INPUT
-    ================================================= */
-
-    if (profilePhotoInput) {
-
-        profilePhotoInput.addEventListener(
-            "change",
-            async function (event) {
-
-                const file =
-                    event.target.files &&
-                    event.target.files[0];
-
-                if (!file) return;
-
-                await uploadProfilePhoto(
-                    file
-                );
-
-                profilePhotoInput.value =
-                    "";
-
-            }
-        );
-
-    }
-
-
-    /* =================================================
-       LOAD PROFILE PHOTO
-    ================================================= */
-
-    async function loadProfilePhoto() {
-
-        if (!supabaseClient) return;
-
-        const {
-            data: {
-                user
-            }
-        } =
-            await supabaseClient.auth
-                .getUser();
-
-
-        if (!user) return;
-
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from("profiles")
-                .select(
-                    "profile_photo_url"
-                )
-                .eq(
-                    "id",
-                    user.id
-                )
-                .maybeSingle();
-
-
-        if (error) {
-
-            console.error(
-                "Could not load profile photo:",
-                error
-            );
-
-            return;
-        }
-
-
-        if (
-            data &&
-            data.profile_photo_url
-        ) {
-
-            displayProfilePhoto(
-                data.profile_photo_url +
-                "?v=" +
-                Date.now()
-            );
-
-        }
-
-    }
-
-
-    /* =================================================
-       STREAK
-    ================================================= */
-
-    async function loadStreak() {
-
-        const streakElement =
-            document.getElementById(
-                "current-streak"
-            );
-
-        if (!streakElement) return;
-
-        if (!supabaseClient) {
-
-            streakElement.textContent =
-                "0";
-
-            return;
-        }
-
-
-        const {
-            data: {
-                user
-            }
-        } =
-            await supabaseClient.auth
-                .getUser();
-
-
-        if (!user) return;
-
-
-        const {
-            data: activities,
-            error
-        } =
-            await supabaseClient
-                .from("activities")
-                .select(
-                    "activity_date"
-                )
-                .eq(
-                    "user_id",
-                    user.id
-                )
-                .order(
-                    "activity_date",
-                    {
-                        ascending: false
-                    }
-                );
-
-
-        if (error) {
-
-            console.error(
-                "Streak error:",
-                error
-            );
-
-            return;
-        }
-
-
-        if (
-            !activities ||
-            activities.length === 0
-        ) {
-
-            streakElement.textContent =
-                "0";
-
-            return;
-        }
-
-
-        const uniqueDates =
-            [
-                ...new Set(
-                    activities.map(
-                        function (activity) {
-
-                            return activity
-                                .activity_date;
-
-                        }
-                    )
-                )
-            ];
-
-
-        let streak = 0;
-
-        let checkDate =
-            new Date();
-
-
-        checkDate.setHours(
-            0,
-            0,
-            0,
-            0
-        );
-
-
-        for (
-            let i = 0;
-            i < uniqueDates.length;
-            i++
-        ) {
-
-            const dateString =
-                checkDate
-                    .toISOString()
-                    .slice(
-                        0,
-                        10
-                    );
-
-
-            if (
-                uniqueDates.includes(
-                    dateString
-                )
-            ) {
-
-                streak++;
-
-                checkDate.setDate(
-                    checkDate.getDate() - 1
-                );
-
-            }
-            else {
-
-                break;
-
-            }
-
-        }
-
-
-        streakElement.textContent =
-            streak;
-
-    }
-
-
-    /* =================================================
-       SAFE PROFILE LOAD
-    ================================================= */
-
-    async function refreshHundoUserData() {
-
-        try {
-
-            await loadProfilePhoto();
-
-            await loadStreak();
-
-        }
-        catch (error) {
-
-            console.error(
-                "HUNDO profile refresh error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /* =================================================
-       WAIT FOR SUPABASE SESSION
-    ================================================= */
-
-    async function finishStartup() {
-
-        /*
-           Wait for the Supabase client to exist.
-           This prevents the login page flashing
-           before the session is restored.
-        */
-
-        let attempts = 0;
-
-        while (
-            !supabaseClient &&
-            attempts < 100
-        ) {
-
-            await new Promise(
-                function (resolve) {
-
-                    setTimeout(
-                        resolve,
-                        50
-                    );
-
-                }
-            );
-
-            attempts++;
-
-        }
-
-
-        if (!supabaseClient) {
-
-            hideHundoSplash();
-
-            return;
-        }
-
-
-        try {
-
-            const {
-                data
-            } =
-                await supabaseClient.auth
-                    .getSession();
-
-
-            if (
-                data &&
-                data.session
-            ) {
-
-                openApp();
-
-                await refreshHundoUserData();
-
-            }
-
-        }
-        catch (error) {
-
-            console.error(
-                "HUNDO startup session error:",
-                error
-            );
-
-        }
-
-
-        /*
-           Keep the splash long enough for
-           the HUNDO animation to actually
-           be seen.
-        */
-
-        setTimeout(
-            hideHundoSplash,
-            850
-        );
-
-    }
-
-
-    /* =================================================
-       AUTH STATE CHANGES
-    ================================================= */
-
-    function listenForAuthChanges() {
-
-        if (!supabaseClient) return;
-
-        supabaseClient.auth
-            .onAuthStateChange(
-                async function (
-                    event,
-                    session
-                ) {
-
-                    if (
-                        event ===
-                        "SIGNED_IN"
-                    ) {
-
-                        openApp();
-
-                        await refreshHundoUserData();
-
-                    }
-
-
-                    if (
-                        event ===
-                        "SIGNED_OUT"
-                    ) {
-
-                        location.reload();
-
-                    }
-
-                }
-            );
-
-    }
-
-
-    /* =================================================
-       START FIX PACK
-    ================================================= */
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-            /*
-               Wait one tick so the original
-               HUNDO initialization can create
-               the Supabase client.
-            */
-
-            setTimeout(
-                function () {
-
-                    finishStartup();
-
-                    listenForAuthChanges();
-
-                },
-                50
-            );
-
-        }
-    );
-
-})();
