@@ -3572,3 +3572,51 @@ async function logout() {
 console.log(
     "HUNDO loaded."
 );
+
+/* =================================================
+   EDIT PROFILE TOGGLE
+================================================= */
+
+const editProfileButton =
+    document.getElementById("edit-profile-button");
+
+const closeProfileEditor =
+    document.getElementById("close-profile-editor");
+
+const profileEditor =
+    document.getElementById("profile-editor");
+
+if (editProfileButton && profileEditor) {
+
+    editProfileButton.addEventListener(
+        "click",
+        function () {
+
+            profileEditor.classList.remove("hidden");
+
+            editProfileButton.classList.add("hidden");
+
+            window.scrollTo({
+                top: profileEditor.offsetTop - 20,
+                behavior: "smooth"
+            });
+
+        }
+    );
+}
+
+if (closeProfileEditor && profileEditor) {
+
+    closeProfileEditor.addEventListener(
+        "click",
+        function () {
+
+            profileEditor.classList.add("hidden");
+
+            if (editProfileButton) {
+                editProfileButton.classList.remove("hidden");
+            }
+
+        }
+    );
+}
