@@ -3620,3 +3620,773 @@ if (closeProfileEditor && profileEditor) {
         }
     );
 }
+
+/* =====================================================
+   HUNDO FIX PACK
+   - Startup splash
+   - Session loading
+   - Profile photo upload
+   - Profile photo preview
+   - Streak counter
+===================================================== */
+
+(function () {
+
+    /* =================================================
+       STARTUP SPLASH
+    ================================================= */
+
+    const splash =
+        document.getElementById("hundo-splash");
+
+    function hideHundoSplash() {
+
+        if (!splash) return;
+
+        splash.classList.add(
+            "splash-hidden"
+        );
+
+        setTimeout(function () {
+
+            splash.remove();
+
+        }, 500);
+
+    }
+
+
+    /* =================================================
+       PROFILE PHOTO ELEMENTS
+    ================================================= */
+
+    const profilePicture =
+        document.getElementById(
+            "profile-picture"
+        );
+
+    const profilePhotoButton =
+        document.getElementById(
+            "profile-photo-button"
+        );
+
+    const profilePhotoInput =
+        document.getElementById(
+            "profile-photo-input"
+        );
+
+
+    /* =================================================
+       PROFILE PHOTO DISPLAY
+    ================================================= */
+
+    function displayProfilePhoto(url) {
+
+        if (!profilePicture) return;
+
+        if (!url) {
+
+            profilePicture.innerHTML = "👤";
+
+            return;
+        }
+
+        profilePicture.innerHTML = "";
+
+        const image =
+            document.createElement("img");
+
+        image.src = url;
+
+        image.alt = "Profile picture";
+
+        image.loading = "eager";
+
+        image.onerror = function () {
+
+            profilePicture.innerHTML = "👤";
+
+        };
+
+        profilePicture.appendChild(
+            image
+        );
+
+    }
+
+
+    /* =================================================
+       OPEN FILE PICKER
+    ================================================= */
+
+    if (
+        profilePhotoButton &&
+        profilePhotoInput
+    ) {
+
+        profilePhotoButton.addEventListener(
+            "click",
+            function () {
+
+                profilePhotoInput.click();
+
+            }
+        );
+
+    }
+
+
+    /* =================================================
+       UPLOAD PROFILE PHOTO
+    ================================================= */
+
+    async function uploadProfilePhoto(file) {
+
+        if (!file) return;
+
+        if (!supabaseClient) {
+
+            alert(
+                "HUNDO is still connecting. Please try again."
+            );
+
+            return;
+        }
+
+
+        const {
+            data: {
+                user
+            },
+            error: userError
+        } =
+            await supabaseClient.auth
+                .getUser();
+
+
+        if (
+            userError ||
+            !user
+        ) {
+
+            alert(
+                "Your session could not be found."
+            );
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           FILE VALIDATION
+        --------------------------------------------- */
+
+        if (
+            !file.type.startsWith(
+                "image/"
+            )
+        ) {
+
+            alert(
+                "Please choose an image."
+            );
+
+            return;
+        }
+
+
+        if (
+            file.size >
+            50 * 1024 * 1024
+        ) {
+
+            alert(
+                "That image is too large. Please choose one under 50 MB."
+            );
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           TEMPORARY LOCAL PREVIEW
+        --------------------------------------------- */
+
+        const localUrl =
+            URL.createObjectURL(file);
+
+        displayProfilePhoto(
+            localUrl
+        );
+
+
+        /* ---------------------------------------------
+           UNIQUE FILE PATH
+        --------------------------------------------- */
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+        const filePath =
+            user.id +
+            "/profile-" +
+            Date.now() +
+            "." +
+            extension;
+
+
+        /* ---------------------------------------------
+           UPLOAD
+        --------------------------------------------- */
+
+        const {
+            error: uploadError
+        } =
+            await supabaseClient
+                .storage
+                .from("Profile pictures")
+                .upload(
+                    filePath,
+                    file,
+                    {
+                        upsert: true,
+                        cacheControl: "3600"
+                    }
+                );
+
+
+        if (uploadError) {
+
+            console.error(
+                "Profile photo upload error:",
+                uploadError
+            );
+
+            alert(
+                "Profile picture could not be uploaded."
+            );
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           PUBLIC URL
+        --------------------------------------------- */
+
+        const {
+            data: publicData
+        } =
+            supabaseClient
+                .storage
+                .from("Profile pictures")
+                .getPublicUrl(
+                    filePath
+                );
+
+
+        const publicUrl =
+            publicData.publicUrl;
+
+
+        /* ---------------------------------------------
+           SAVE URL TO PROFILE
+        --------------------------------------------- */
+
+        const {
+            error: profileError
+        } =
+            await supabaseClient
+                .from("profiles")
+                .update({
+                    profile_photo_url:
+                        publicUrl
+                })
+                .eq(
+                    "id",
+                    user.id
+                );
+
+
+        if (profileError) {
+
+            console.error(
+                "Profile photo database error:",
+                profileError
+            );
+
+            alert(
+                "Photo uploaded, but the profile could not be updated."
+            );
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           SHOW PERMANENT URL
+        --------------------------------------------- */
+
+        displayProfilePhoto(
+            publicUrl +
+            "?v=" +
+            Date.now()
+        );
+
+
+        /* ---------------------------------------------
+           UPDATE ANY PROFILE PHOTO ELEMENTS
+        --------------------------------------------- */
+
+        document
+            .querySelectorAll(
+                "[data-profile-photo]"
+            )
+            .forEach(
+                function (element) {
+
+                    element.src =
+                        publicUrl +
+                        "?v=" +
+                        Date.now();
+
+                }
+            );
+
+
+        console.log(
+            "HUNDO: Profile photo updated."
+        );
+
+    }
+
+
+    /* =================================================
+       PHOTO INPUT
+    ================================================= */
+
+    if (profilePhotoInput) {
+
+        profilePhotoInput.addEventListener(
+            "change",
+            async function (event) {
+
+                const file =
+                    event.target.files &&
+                    event.target.files[0];
+
+                if (!file) return;
+
+                await uploadProfilePhoto(
+                    file
+                );
+
+                profilePhotoInput.value =
+                    "";
+
+            }
+        );
+
+    }
+
+
+    /* =================================================
+       LOAD PROFILE PHOTO
+    ================================================= */
+
+    async function loadProfilePhoto() {
+
+        if (!supabaseClient) return;
+
+        const {
+            data: {
+                user
+            }
+        } =
+            await supabaseClient.auth
+                .getUser();
+
+
+        if (!user) return;
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("profiles")
+                .select(
+                    "profile_photo_url"
+                )
+                .eq(
+                    "id",
+                    user.id
+                )
+                .maybeSingle();
+
+
+        if (error) {
+
+            console.error(
+                "Could not load profile photo:",
+                error
+            );
+
+            return;
+        }
+
+
+        if (
+            data &&
+            data.profile_photo_url
+        ) {
+
+            displayProfilePhoto(
+                data.profile_photo_url +
+                "?v=" +
+                Date.now()
+            );
+
+        }
+
+    }
+
+
+    /* =================================================
+       STREAK
+    ================================================= */
+
+    async function loadStreak() {
+
+        const streakElement =
+            document.getElementById(
+                "current-streak"
+            );
+
+        if (!streakElement) return;
+
+        if (!supabaseClient) {
+
+            streakElement.textContent =
+                "0";
+
+            return;
+        }
+
+
+        const {
+            data: {
+                user
+            }
+        } =
+            await supabaseClient.auth
+                .getUser();
+
+
+        if (!user) return;
+
+
+        const {
+            data: activities,
+            error
+        } =
+            await supabaseClient
+                .from("activities")
+                .select(
+                    "activity_date"
+                )
+                .eq(
+                    "user_id",
+                    user.id
+                )
+                .order(
+                    "activity_date",
+                    {
+                        ascending: false
+                    }
+                );
+
+
+        if (error) {
+
+            console.error(
+                "Streak error:",
+                error
+            );
+
+            return;
+        }
+
+
+        if (
+            !activities ||
+            activities.length === 0
+        ) {
+
+            streakElement.textContent =
+                "0";
+
+            return;
+        }
+
+
+        const uniqueDates =
+            [
+                ...new Set(
+                    activities.map(
+                        function (activity) {
+
+                            return activity
+                                .activity_date;
+
+                        }
+                    )
+                )
+            ];
+
+
+        let streak = 0;
+
+        let checkDate =
+            new Date();
+
+
+        checkDate.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+
+        for (
+            let i = 0;
+            i < uniqueDates.length;
+            i++
+        ) {
+
+            const dateString =
+                checkDate
+                    .toISOString()
+                    .slice(
+                        0,
+                        10
+                    );
+
+
+            if (
+                uniqueDates.includes(
+                    dateString
+                )
+            ) {
+
+                streak++;
+
+                checkDate.setDate(
+                    checkDate.getDate() - 1
+                );
+
+            }
+            else {
+
+                break;
+
+            }
+
+        }
+
+
+        streakElement.textContent =
+            streak;
+
+    }
+
+
+    /* =================================================
+       SAFE PROFILE LOAD
+    ================================================= */
+
+    async function refreshHundoUserData() {
+
+        try {
+
+            await loadProfilePhoto();
+
+            await loadStreak();
+
+        }
+        catch (error) {
+
+            console.error(
+                "HUNDO profile refresh error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =================================================
+       WAIT FOR SUPABASE SESSION
+    ================================================= */
+
+    async function finishStartup() {
+
+        /*
+           Wait for the Supabase client to exist.
+           This prevents the login page flashing
+           before the session is restored.
+        */
+
+        let attempts = 0;
+
+        while (
+            !supabaseClient &&
+            attempts < 100
+        ) {
+
+            await new Promise(
+                function (resolve) {
+
+                    setTimeout(
+                        resolve,
+                        50
+                    );
+
+                }
+            );
+
+            attempts++;
+
+        }
+
+
+        if (!supabaseClient) {
+
+            hideHundoSplash();
+
+            return;
+        }
+
+
+        try {
+
+            const {
+                data
+            } =
+                await supabaseClient.auth
+                    .getSession();
+
+
+            if (
+                data &&
+                data.session
+            ) {
+
+                openApp();
+
+                await refreshHundoUserData();
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "HUNDO startup session error:",
+                error
+            );
+
+        }
+
+
+        /*
+           Keep the splash long enough for
+           the HUNDO animation to actually
+           be seen.
+        */
+
+        setTimeout(
+            hideHundoSplash,
+            850
+        );
+
+    }
+
+
+    /* =================================================
+       AUTH STATE CHANGES
+    ================================================= */
+
+    function listenForAuthChanges() {
+
+        if (!supabaseClient) return;
+
+        supabaseClient.auth
+            .onAuthStateChange(
+                async function (
+                    event,
+                    session
+                ) {
+
+                    if (
+                        event ===
+                        "SIGNED_IN"
+                    ) {
+
+                        openApp();
+
+                        await refreshHundoUserData();
+
+                    }
+
+
+                    if (
+                        event ===
+                        "SIGNED_OUT"
+                    ) {
+
+                        location.reload();
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    /* =================================================
+       START FIX PACK
+    ================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            /*
+               Wait one tick so the original
+               HUNDO initialization can create
+               the Supabase client.
+            */
+
+            setTimeout(
+                function () {
+
+                    finishStartup();
+
+                    listenForAuthChanges();
+
+                },
+                50
+            );
+
+        }
+    );
+
+})();
